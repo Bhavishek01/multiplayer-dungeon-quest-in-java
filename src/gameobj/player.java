@@ -58,38 +58,32 @@ public class player extends entity{
     {
         if(key.up == true || key.down == true || key.left == true || key.right == true || key.attack == true)
     {
-
         if(key.up == true)
         {
             status ="up";
             playerY -= playerspeed;
         }
-
         else if(key.down == true)
         {
             status ="down";
             playerY += playerspeed;
         }
-
         else if(key.left == true)
         {
             status ="left";
             playerX -= playerspeed;
         }
-
         else if(key.right == true)
         {
             status ="right";
             playerX += playerspeed;
         }
-
         else if(key.attack == true)
         {
             status = "idle";
             // attack animation 
             // enemy ko life decrease if enemy sanga collide vaye
         }
-
         count ++;
         if(count >12)
         {
@@ -144,10 +138,8 @@ public class player extends entity{
             if(flip ==2 )
                 image = left2;
             break;
-
-
         }
-
+        
         g2.drawImage(image, playerX,playerY, p.tiles,p.tiles,null);
 
     }

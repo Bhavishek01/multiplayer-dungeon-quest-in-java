@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
+import background.backgroundmanager;
 import gameobj.player;
 
 public class gamepannel extends JPanel implements Runnable{
@@ -15,15 +16,19 @@ public class gamepannel extends JPanel implements Runnable{
     int scale = 3;
 
     public int tiles = tilesize * scale;
-    int maxcol = 30;
-    int maxrow = 18;
+    int maxcol = 20;
+    int maxrow = 16;
 
     int height = tiles * maxrow;
     int base = tiles *maxcol;
 
+    int mapheight = tiles * 50;
+    int mapwidth = tiles * 50;
+
     int fps = 60;
 
     input key = new input();
+    backgroundmanager bgm = new backgroundmanager(this);
     player p1 = new player(this, key);
     Thread gameThread;
 
@@ -80,6 +85,9 @@ public class gamepannel extends JPanel implements Runnable{
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D)g;
+
+
+        bgm.draw(g2);
         p1.draw(g2);
         g2.dispose();
     }
