@@ -8,4 +8,7 @@ public class entity {
     public BufferedImage down1,down2,left1,left2,up1,up2,right1,right2,idle1,idle2,attacking1,attacking2;
     public String status;
 
+    public int count = 0;
+    public int flip = 1;
+
 }

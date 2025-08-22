@@ -9,14 +9,14 @@ import javax.swing.JPanel;
 
 import gameobj.player;
 
-public class pannel extends JPanel implements Runnable{
+public class gamepannel extends JPanel implements Runnable{
 
     int tilesize = 16;
-    int scale = 2;
+    int scale = 3;
 
     public int tiles = tilesize * scale;
-    int maxcol = 40;
-    int maxrow = 26;
+    int maxcol = 30;
+    int maxrow = 18;
 
     int height = tiles * maxrow;
     int base = tiles *maxcol;
@@ -30,7 +30,7 @@ public class pannel extends JPanel implements Runnable{
 
     
 
-    public pannel()
+    public gamepannel()
     {
     this.setPreferredSize(new Dimension(base,height));
     this.setBackground(Color.BLACK);
