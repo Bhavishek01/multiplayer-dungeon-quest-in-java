@@ -1,0 +1,11 @@
+                        Multiplayer Doungen Quest
+
+    1. create game loop
+    2. create game objects
+                1. player
+                2. enemy
+                3. obctacles
+    3. control player
+    4. enemy loop
+    6. create Map
+    7. run this much
