@@ -1,5 +1,6 @@
 package gameobj;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -162,8 +163,12 @@ public class player extends entity{
             break;
         }
         
-        g2.drawImage(image, player_map_X,player_map_Y, p.tiles,p.tiles,null);
+        //g2.drawImage(image, player_map_X,player_map_Y, p.tiles,p.tiles,null);
         // g2.drawImage(image, ((48*16)/2),((48*12)/2), p.tiles,p.tiles,null);
+        
+        g2.setColor(Color.BLUE);
+
+        g2.fillRect(player_map_X, player_map_Y, p.tiles, p.tiles);
 
     }
 }
