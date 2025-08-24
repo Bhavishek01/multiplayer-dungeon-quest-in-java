@@ -12,9 +12,10 @@ import gameobj.player;
 
 public class gamepannel extends JPanel implements Runnable{
 
-    public int tiles = 48 ;
+    public int playertiles = 48 ;
     public int maxcol = 16;
     public int maxrow = 12;
+    public int tiles = 48 ;
 
     int height = tiles * maxrow;
     int base = tiles *maxcol;
@@ -83,7 +84,7 @@ public class gamepannel extends JPanel implements Runnable{
         Graphics2D g2 = (Graphics2D)g;
 
 
-        // bgm.draw(g2);
+        bgm.draw(g2);
         p1.draw(g2);
         g2.dispose();
     }
