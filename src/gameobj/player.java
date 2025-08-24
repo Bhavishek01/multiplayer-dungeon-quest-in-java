@@ -19,7 +19,7 @@ public class player extends entity{
         this.p = p;
         this.key = key;
         setDefaultValues();
-        setimage();;
+        setimage();
 
     }
 
@@ -27,7 +27,7 @@ public class player extends entity{
         playerX = 100;
         playerY = 100;
         playerlife = 100;
-        playerspeed = 1;
+        playerspeed = 2;
         status ="idle";
     }
     
@@ -43,10 +43,10 @@ public class player extends entity{
             right2 = ImageIO.read(new File("resource/player/right_2.png"));
             left1 = ImageIO.read(new File("resource/player/left_1.png"));
             left2 = ImageIO.read(new File("resource/player/left_2.png"));
-            idle1 = ImageIO.read(new File("resource/player/idle1.png"));
-            idle2 = ImageIO.read(new File("resource/player/idle2.png"));
-            attacking1 = ImageIO.read(new File("resource/player/attacking1.png"));
-            attacking2 = ImageIO.read(new File("resource/player/attacking2.png"));
+            // idle1 = ImageIO.read(new File("resource/player/idle1.png"));
+            // idle2 = ImageIO.read(new File("resource/player/idle2.png"));
+            // attacking1 = ImageIO.read(new File("resource/player/attacking1.png"));
+            // attacking2 = ImageIO.read(new File("resource/player/attacking2.png"));
             
         } 
         catch (IOException e) {
@@ -102,8 +102,6 @@ public class player extends entity{
 
     public void draw(Graphics2D g2)
     {
-        // g2.setColor(Color.white);
-        // g2.fillRect(playerX, playerY, p.tiles, p.tiles);
 
         BufferedImage image = null;
 

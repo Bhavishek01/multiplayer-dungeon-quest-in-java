@@ -11,13 +11,10 @@ import background.backgroundmanager;
 import gameobj.player;
 
 public class gamepannel extends JPanel implements Runnable{
-
-    int tilesize = 16;
-    int scale = 3;
-
-    public int tiles = tilesize * scale;
-    int maxcol = 20;
-    int maxrow = 16;
+    
+    public int tiles = 48 ;
+    int maxcol = 16;
+    int maxrow = 12;
 
     int height = tiles * maxrow;
     int base = tiles *maxcol;
@@ -31,9 +28,6 @@ public class gamepannel extends JPanel implements Runnable{
     backgroundmanager bgm = new backgroundmanager(this);
     player p1 = new player(this, key);
     Thread gameThread;
-
-
-    
 
     public gamepannel()
     {
