@@ -15,12 +15,18 @@ public class player extends entity{
     gamepannel p;
     input key;
 
+        public int centerx , centery;
+
+
     public player(gamepannel p, input key){
         this.p = p;
         this.key = key;
+
+        centerx = (p.base/2)-p.tiles/2;
+        centery = ((p.height)/2)-p.tiles/2;
+
         setDefaultValues();
         setimage();
-
     }
 
     
@@ -162,8 +168,8 @@ public class player extends entity{
             break;
         }
         
-        g2.drawImage(image, player_map_X,player_map_Y, p.playertiles,p.playertiles,null);
-        // g2.drawImage(image, ((48*16)/2),((48*12)/2), p.tiles,p.tiles,null);
+        g2.drawImage(image, player_map_X,player_map_Y, p.tiles,p.tiles,null);
+        // g2.drawImage(image, centerx,centery, p.tiles,p.tiles,null);
 
     }
 }

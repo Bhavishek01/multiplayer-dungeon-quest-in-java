@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+
+
 import main.gamepannel;
 
 public class backgroundmanager {
@@ -15,8 +17,6 @@ public class backgroundmanager {
     private obstacles o;
     private gamepannel gp;
     private int[][] dungeonMap;
-    private static final int VIEWPORT_WIDTH = 16; // 16 tiles wide
-    private static final int VIEWPORT_HEIGHT = 12; // 12 tiles high
 
     public backgroundmanager(gamepannel gp) {
         this.gp = gp;
@@ -54,10 +54,8 @@ public class backgroundmanager {
                 for( int j= 0; j < gp.maprow; j++)
                 {
                     dungeonMap[i][j] = Integer.parseInt(num[j]);
-                    System.out.print(Integer.parseInt(num[j]) + " ");
                 }
                 i++;
-                System.out.println("");
             }
             }
         } catch (IOException e) {
@@ -67,25 +65,33 @@ public class backgroundmanager {
 
     public void draw(Graphics2D g2) {
         // Draw tiles within the 16X12 viewport
-        for (int row = 0; row < VIEWPORT_HEIGHT; row++) {
-            for (int col = 0; col < VIEWPORT_WIDTH; col++) {
+        for (int row = 0; row < gp.mapcol; row++) {
+            for (int col = 0; col < gp.maprow; col++) {
                 
                     int tileType = dungeonMap[row][col];
-                    int x = col * gp.tiles; // p.tiles is tile size (16 pixels)
-                    int y = row * gp.tiles;
+
+                    // int x = col * gp.tiles; 
+                    // int y = row * gp.tiles;
+
+                    // int mapx = x- gp.p1.player_map_X + gp.p1.centerx;
+                    // int mapy = y - gp.p1.player_map_Y + gp.p1.centery;
+
+                    int mapx = col * gp.tiles; 
+                    int mapy = row * gp.tiles;
+
 
                     switch (tileType) {
                         case 0: // Wall
-                            g2.drawImage(w.image, x, y, gp.tiles, gp.tiles, null);
+                            g2.drawImage(w.image, mapx, mapy, gp.tiles, gp.tiles, null);
                             break;
                         case 1: // Stone (assuming stone uses ground image; adjust if needed)
-                            g2.drawImage(o.image, x, y, gp.tiles, gp.tiles, null);
+                            g2.drawImage(o.image, mapx, mapy, gp.tiles, gp.tiles, null);
                             break;
                         case 2: // Ground
-                            g2.drawImage(g.image, x, y, gp.tiles, gp.tiles, null);
+                            g2.drawImage(g.image, mapx, mapy, gp.tiles, gp.tiles, null);
                             break;
                         case 3: // Water
-                            g2.drawImage(l.image, x, y, gp.tiles, gp.tiles, null);
+                            g2.drawImage(l.image, mapx, mapy, gp.tiles, gp.tiles, null);
                             break;
                         default:
                             // Draw nothing or a default tile if needed

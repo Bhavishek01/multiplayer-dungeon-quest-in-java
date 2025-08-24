@@ -12,13 +12,13 @@ import gameobj.player;
 
 public class gamepannel extends JPanel implements Runnable{
 
-    public int playertiles = 48 ;
+    public int tiles = 48 ;
     public int maxcol = 16;
     public int maxrow = 12;
-    public int tiles = 48 ;
+    
 
-    int height = tiles * maxrow;
-    int base = tiles *maxcol;
+    public int height = tiles * maxrow;
+    public int base = tiles *maxcol;
 
     public int maprow = 50;
     public int mapcol = 50;
@@ -29,7 +29,7 @@ public class gamepannel extends JPanel implements Runnable{
 
     input key = new input();
     backgroundmanager bgm = new backgroundmanager(this);
-    player p1 = new player(this, key);
+    public player p1 = new player(this, key);
     Thread gameThread;
 
     public gamepannel()
