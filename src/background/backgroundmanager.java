@@ -13,23 +13,21 @@ public class backgroundmanager {
     private wall w;
     private water l;
     private obstacles o;
-    private gamepannel p;
+    private gamepannel gp;
     private int[][] dungeonMap;
-    private static final int GRID_width = 16; // 50x50 tile map
-    private static final int GRID_height = 16; // 50x50 tile map
     private static final int VIEWPORT_WIDTH = 16; // 16 tiles wide
     private static final int VIEWPORT_HEIGHT = 12; // 12 tiles high
 
     public backgroundmanager(gamepannel gp) {
-        this.p = gp;
+        this.gp = gp;
         g = new ground();
         w = new wall();
         l = new water();
         o = new obstacles();
-        dungeonMap = new int[GRID_width][GRID_height];
+        dungeonMap = new int[gp.maprow][gp.mapcol];
 
         backgroundImage();
-        readDungeonFile("src/background/16x12.txt");
+        readDungeonFile("resource/50x40.txt");
     }
 
     public void backgroundImage() {
@@ -48,12 +46,12 @@ public class backgroundmanager {
             int readline = 0;
             int i = 0;
             String line;
-            while ((line = reader.readLine()) != null && readline < GRID_height) {
+            while ((line = reader.readLine()) != null && readline < gp.mapcol) {
 
                 
                 {String[] num = line.trim().split("\\s+");
 
-                for( int j= 0; j < GRID_width; j++)
+                for( int j= 0; j < gp.maprow; j++)
                 {
                     dungeonMap[i][j] = Integer.parseInt(num[j]);
                     System.out.print(Integer.parseInt(num[j]) + " ");
@@ -73,21 +71,21 @@ public class backgroundmanager {
             for (int col = 0; col < VIEWPORT_WIDTH; col++) {
                 
                     int tileType = dungeonMap[row][col];
-                    int x = col * 48; // p.tiles is tile size (16 pixels)
-                    int y = row * 48;
+                    int x = col * gp.tiles; // p.tiles is tile size (16 pixels)
+                    int y = row * gp.tiles;
 
                     switch (tileType) {
                         case 0: // Wall
-                            g2.drawImage(w.image, x, y, p.tiles, p.tiles, null);
+                            g2.drawImage(w.image, x, y, gp.tiles, gp.tiles, null);
                             break;
                         case 1: // Stone (assuming stone uses ground image; adjust if needed)
-                            g2.drawImage(o.image, x, y, p.tiles, p.tiles, null);
+                            g2.drawImage(o.image, x, y, gp.tiles, gp.tiles, null);
                             break;
                         case 2: // Ground
-                            g2.drawImage(g.image, x, y, p.tiles, p.tiles, null);
+                            g2.drawImage(g.image, x, y, gp.tiles, gp.tiles, null);
                             break;
                         case 3: // Water
-                            g2.drawImage(l.image, x, y, p.tiles, p.tiles, null);
+                            g2.drawImage(l.image, x, y, gp.tiles, gp.tiles, null);
                             break;
                         default:
                             // Draw nothing or a default tile if needed

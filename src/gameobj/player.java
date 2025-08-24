@@ -23,9 +23,10 @@ public class player extends entity{
 
     }
 
+    
     public void setDefaultValues(){
-        playerX = 100;
-        playerY = 100;
+        player_map_X = 0;
+        player_map_X = 0;
         playerlife = 100;
         playerspeed = 2;
         status ="idle";
@@ -43,10 +44,10 @@ public class player extends entity{
             right2 = ImageIO.read(new File("resource/player/right_2.png"));
             left1 = ImageIO.read(new File("resource/player/left_1.png"));
             left2 = ImageIO.read(new File("resource/player/left_2.png"));
-            // idle1 = ImageIO.read(new File("resource/player/idle1.png"));
-            // idle2 = ImageIO.read(new File("resource/player/idle2.png"));
-            // attacking1 = ImageIO.read(new File("resource/player/attacking1.png"));
-            // attacking2 = ImageIO.read(new File("resource/player/attacking2.png"));
+            idle1 = ImageIO.read(new File("resource/player/idle1.png"));
+            idle2 = ImageIO.read(new File("resource/player/idle2.png"));
+            // attack1 = ImageIO.read(new File("resource/player/attack1.png"));
+            // attack2 = ImageIO.read(new File("resource/player/attack2.png"));
             
         } 
         catch (IOException e) {
@@ -56,31 +57,41 @@ public class player extends entity{
 
     public void update()
     {
-        if(key.up == true || key.down == true || key.left == true || key.right == true || key.attack == true)
+        if((key.up == false || key.down == false || key.left == false || key.right == false || key.attack == false))
+            {
+                count ++;
+                if(count >250)
+                {
+                    status = "idle";
+                }
+                
+            }
+
+        if(key.up == true || key.down == true || key.left == true || key.right == true || key.attack == true || status == "idle")
     {
         if(key.up == true)
         {
             status ="up";
-            playerY -= playerspeed;
+            player_map_Y -= playerspeed;
         }
         else if(key.down == true)
         {
             status ="down";
-            playerY += playerspeed;
+            player_map_Y += playerspeed;
         }
         else if(key.left == true)
         {
             status ="left";
-            playerX -= playerspeed;
+            player_map_X -= playerspeed;
         }
         else if(key.right == true)
         {
             status ="right";
-            playerX += playerspeed;
+            player_map_X += playerspeed;
         }
         else if(key.attack == true)
         {
-            status = "idle";
+            status = "attack";
             // attack animation 
             // enemy ko life decrease if enemy sanga collide vaye
         }
@@ -91,7 +102,6 @@ public class player extends entity{
             {flip = 2;}
             else 
             {flip = 1;}
-        
         count = 0;
         }
 
@@ -136,9 +146,24 @@ public class player extends entity{
             if(flip ==2 )
                 image = left2;
             break;
+
+            case "attack":
+            if(flip == 1)
+                image = attack1;
+            if(flip ==2 )
+                image = attack2;
+            break;
+
+            case "idle":
+            if(flip == 1)
+                image = idle1;
+            if(flip ==2 )
+                image = idle2;
+            break;
         }
         
-        g2.drawImage(image, playerX,playerY, p.tiles,p.tiles,null);
+        g2.drawImage(image, player_map_X,player_map_Y, p.tiles,p.tiles,null);
+        // g2.drawImage(image, ((48*16)/2),((48*12)/2), p.tiles,p.tiles,null);
 
     }
 }

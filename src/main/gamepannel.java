@@ -11,16 +11,18 @@ import background.backgroundmanager;
 import gameobj.player;
 
 public class gamepannel extends JPanel implements Runnable{
-    
+
     public int tiles = 48 ;
-    int maxcol = 16;
-    int maxrow = 12;
+    public int maxcol = 16;
+    public int maxrow = 12;
 
     int height = tiles * maxrow;
     int base = tiles *maxcol;
 
-    int mapheight = tiles * 50;
-    int mapwidth = tiles * 50;
+    public int maprow = 50;
+    public int mapcol = 50;
+    int mapheight = tiles * mapcol;
+    int mapwidth = tiles * maprow;
 
     int fps = 60;
 
