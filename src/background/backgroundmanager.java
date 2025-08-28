@@ -63,21 +63,22 @@ public class backgroundmanager {
         }
     }
 
-    public void draw(Graphics2D g2) {
+    public void draw(Graphics2D g2) 
+    {
         // Draw tiles within the 16X12 viewport
         for (int row = 0; row < gp.mapcol; row++) {
             for (int col = 0; col < gp.maprow; col++) {
                 
                     int tileType = dungeonMap[row][col];
 
-                    // int x = col * gp.tiles; 
-                    // int y = row * gp.tiles;
+                    int x = col * gp.tiles; 
+                    int y = row * gp.tiles;
 
-                    // int mapx = x- gp.p1.player_map_X + gp.p1.centerx;
-                    // int mapy = y - gp.p1.player_map_Y + gp.p1.centery;
+                    int mapx = x- gp.p1.player_map_X + gp.p1.centerx;
+                    int mapy = y - gp.p1.player_map_Y + gp.p1.centery;
 
-                    int mapx = col * gp.tiles; 
-                    int mapy = row * gp.tiles;
+                    // int mapx = col * gp.tiles; 
+                    // int mapy = row * gp.tiles;
 
 
                     switch (tileType) {

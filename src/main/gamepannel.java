@@ -59,7 +59,6 @@ public class gamepannel extends JPanel implements Runnable{
         {
             
             p1.update();
-
             repaint();
 
             try {

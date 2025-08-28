@@ -168,8 +168,8 @@ public class player extends entity{
             break;
         }
         
-        g2.drawImage(image, player_map_X,player_map_Y, p.tiles,p.tiles,null);
-        // g2.drawImage(image, centerx,centery, p.tiles,p.tiles,null);
+        // g2.drawImage(image, player_map_X,player_map_Y, p.tiles,p.tiles,null);
+        g2.drawImage(image, centerx,centery, p.tiles,p.tiles,null);
 
     }
 }
