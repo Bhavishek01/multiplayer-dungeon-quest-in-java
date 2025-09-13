@@ -11,17 +11,15 @@ public class frame{
         f.setResizable(false);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        gamepannel pannel = new gamepannel();
+        loginornew l = new loginornew();
 
-        f.add(pannel);
+        f.add(l.getCardPanel());
         f.pack();
 
         f.setVisible(true);
         f.setLayout(null);
         f.setLocationRelativeTo(null);
-
-        pannel.startgame();
-
         
     }
+    
 }

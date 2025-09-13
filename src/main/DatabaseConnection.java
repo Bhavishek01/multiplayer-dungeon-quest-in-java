@@ -1,4 +1,4 @@
-package socket_and_Jdbc;
+package main;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,6 +26,6 @@ public class DatabaseConnection {
     }
 
     public static void main(String[] args) {
-        Connection con = DatabaseConnection.getConnection();
+        
     }
 }
