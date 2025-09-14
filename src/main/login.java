@@ -20,18 +20,18 @@ import background.background;
 
 public class login extends background implements ActionListener {
     private Font arial_40;
-    JLabel pl;
+    private JLabel pl;
     private JTextField playerIdField;
     private JButton submitButton;
     private CardLayout cardLayout;
     private JPanel cardPanel;
-    private playercheck playerCheck ;
+    private playercheck pc ;
     private gamepannel gp; // Store gamepannel reference
 
-    public login(CardLayout cardLayout, JPanel cardPanel) {
+    public login(CardLayout cardLayout, JPanel cardPanel,playercheck pc) {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
-        this.playerCheck = new playercheck();
+        this.pc = pc;
 
         gp = new gamepannel();
 
@@ -94,10 +94,10 @@ public class login extends background implements ActionListener {
             String playerId = playerIdField.getText().trim();
             if (!playerId.isEmpty()) {
                 try {
-                    playerCheck.setPlayerId(playerId);
-                    playerCheck.checkid();
-                    if (playerCheck.isExists()) {
-                        playerCheck.setGameEntered(true);
+                    pc.setPlayerId(playerId);
+                    pc.checkplayerid();
+                    if (pc.isExists()) {
+                        pc.setGameEntered(true);
                         cardLayout.show(cardPanel, "gamemenu");
                     } else {
                         playerIdField.setText(""); // Clear field

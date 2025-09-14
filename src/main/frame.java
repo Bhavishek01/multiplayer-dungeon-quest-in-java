@@ -17,18 +17,21 @@ public class frame{
         // Create CardLayout and container panel
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
+        playercheck playerCheck = new playercheck();
 
         // Create panels
         loginornew loginOrNewPanel = new loginornew(cardLayout, cardPanel);
         gamepannel gamePanel = new gamepannel();
-        login loginPanel = new login(cardLayout, cardPanel);
+        login loginPanel = new login(cardLayout, cardPanel,playerCheck);
         gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gamePanel);
+        newplayer newplayer = new newplayer(cardLayout, cardPanel,playerCheck);
 
         // Add panels to cardPanel
         cardPanel.add(loginOrNewPanel, "loginornew");
         cardPanel.add(loginPanel, "login");
         cardPanel.add(gamePanel, "gamepannel");
         cardPanel.add(gamemenu, "gamemenu");
+        cardPanel.add(newplayer, "newplayer");
 
         // Add cardPanel to frame
         f.add(cardPanel);

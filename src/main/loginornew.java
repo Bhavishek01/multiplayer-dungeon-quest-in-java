@@ -86,7 +86,7 @@ public class loginornew extends background implements ActionListener {
         }
         else if (e.getSource() == new_player) 
         {
-            System.out.println("New Player clicked!"); // Add your logic here
+            cardLayout.show(cardPanel, "newplayer");
         }
     }
 }
