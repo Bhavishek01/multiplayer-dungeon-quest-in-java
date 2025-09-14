@@ -22,25 +22,16 @@ public class login extends background implements ActionListener {
     private Font arial_40;
     private JLabel pl;
     private JTextField playerIdField;
-    private JButton submitButton;
+    private JButton submitButton,back;
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private playercheck pc ;
-    private gamepannel gp; // Store gamepannel reference
 
     public login(CardLayout cardLayout, JPanel cardPanel,playercheck pc) {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
         this.pc = pc;
 
-        gp = new gamepannel();
-
-        // Set up panel properties
-        this.setPreferredSize(new Dimension(gp.base, gp.height)); // Match gamepannel dimensions
-        this.setBackground(Color.BLACK);
-        this.setOpaque(true);
-        this.setDoubleBuffered(true);
-        this.setFocusable(true);
 
         arial_40 = new Font("Arial", Font.BOLD, 25);
 
@@ -77,7 +68,7 @@ public class login extends background implements ActionListener {
 
         add(Box.createVerticalGlue());
 
-        submitButton = new JButton("Submit");
+        submitButton = new JButton("Enter");
         submitButton.setFont(arial_40);
         submitButton.setBorderPainted(true);
         submitButton.setBackground(Color.BLACK);
@@ -86,6 +77,18 @@ public class login extends background implements ActionListener {
         submitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         submitButton.addActionListener(this);
         add(submitButton);
+
+        add(Box.createRigidArea(new Dimension(0, 20)));
+
+        back = new JButton("Back");
+        back.setFont(arial_40);
+        back.setBorderPainted(true);
+        back.setBackground(Color.BLACK);
+        back.setForeground(Color.WHITE);
+        back.setOpaque(false);
+        back.setAlignmentX(Component.CENTER_ALIGNMENT);
+        back.addActionListener(this);
+        add(back);
     }
 
     @Override
@@ -110,6 +113,9 @@ public class login extends background implements ActionListener {
                     pl.setVisible(true);
                 }
             }
+        }
+         else if (e.getSource() == back) {
+            cardLayout.show(cardPanel, "loginornew");
         }
     }
 }

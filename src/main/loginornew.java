@@ -18,9 +18,8 @@ import background.background;
 
 public class loginornew extends background implements ActionListener {
 
-    private gamepannel gp = new gamepannel();
     private Font arial_40;
-    private JButton login, new_player;
+    private JButton login, new_player,exit;
     private CardLayout cardLayout;
     private JPanel cardPanel;
 
@@ -28,11 +27,7 @@ public class loginornew extends background implements ActionListener {
 
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
-        this.setPreferredSize(new Dimension(gp.base, gp.height));
-        this.setDoubleBuffered(true);
-        this.setFocusable(true);
-
-
+ 
         // Fixed font: Use BOLD (CENTER_BASELINE isn't valid)
         arial_40 = new Font("Arial", Font.BOLD, 25);
 
@@ -74,6 +69,18 @@ public class loginornew extends background implements ActionListener {
         new_player.addActionListener(this);
         add(new_player);
 
+        add(Box.createRigidArea(new Dimension(0, 20)));
+
+        exit = new JButton("Exit");
+        exit.setFont(arial_40);
+        exit.setBorderPainted(true);
+        exit.setBackground(Color.BLACK);
+        exit.setForeground(Color.WHITE);
+        exit.setOpaque(false);
+        exit.setAlignmentX(Component.CENTER_ALIGNMENT);
+        exit.addActionListener(this);
+        add(exit);
+
         // Add flexible space below for vertical centering
         add(Box.createVerticalGlue());
     }
@@ -87,6 +94,10 @@ public class loginornew extends background implements ActionListener {
         else if (e.getSource() == new_player) 
         {
             cardLayout.show(cardPanel, "newplayer");
+        }
+        else if (e.getSource() == exit ) {
+            
+            System.exit(0);    
         }
     }
 }

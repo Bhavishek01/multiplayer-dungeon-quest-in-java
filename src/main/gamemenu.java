@@ -17,7 +17,7 @@ import background.background;
 
 public class gamemenu extends background implements ActionListener {
     private Font arial_40;
-    private JButton single,multi,inventory;
+    private JButton single,multi,inventory,exit,loginmenu;
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private gamepannel gp; // Store gamepannel reference
@@ -27,12 +27,7 @@ public class gamemenu extends background implements ActionListener {
         this.cardPanel = cardPanel;
         this.gp = gp;
 
-        // Set up panel properties
-        this.setPreferredSize(new Dimension(gp.base, gp.height)); // Match gamepannel dimensions
-        this.setBackground(Color.BLACK);
-        this.setOpaque(true);
-        this.setDoubleBuffered(true);
-        this.setFocusable(true);
+        
 
         arial_40 = new Font("Arial", Font.BOLD, 25);
 
@@ -82,6 +77,30 @@ public class gamemenu extends background implements ActionListener {
         inventory.addActionListener(this);
         add(inventory);
 
+        add(Box.createRigidArea(new Dimension(0, 20)));
+
+        exit = new JButton("Exit");
+        exit.setFont(arial_40);
+        exit.setBorderPainted(true);
+        exit.setBackground(Color.BLACK);
+        exit.setForeground(Color.WHITE);
+        exit.setOpaque(false);
+        exit.setAlignmentX(Component.CENTER_ALIGNMENT);
+        exit.addActionListener(this);
+        add(exit);
+
+        add(Box.createRigidArea(new Dimension(0, 20)));
+
+        loginmenu = new JButton("Logout");
+        loginmenu.setFont(arial_40);
+        loginmenu.setBorderPainted(true);
+        loginmenu.setBackground(Color.BLACK);
+        loginmenu.setForeground(Color.WHITE);
+        loginmenu.setOpaque(false);
+        loginmenu.setAlignmentX(Component.CENTER_ALIGNMENT);
+        loginmenu.addActionListener(this);
+        add(loginmenu);
+
         add(Box.createVerticalGlue());
 
     }
@@ -107,6 +126,14 @@ public class gamemenu extends background implements ActionListener {
         else if (e.getSource() == inventory ) {
             
             // cardLayout.show(cardPanel, "inventory");
+        }
+        else if (e.getSource() == exit ) {
+            
+            System.exit(0);    
+        }
+        else if (e.getSource() == loginmenu ) {
+            
+            cardLayout.show(cardPanel, "loginornew"); // Start with loginornew panel
         }
     }
 }
