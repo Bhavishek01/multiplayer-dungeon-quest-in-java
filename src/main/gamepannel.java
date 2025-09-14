@@ -39,14 +39,16 @@ public class gamepannel extends JPanel implements Runnable{
     this.setDoubleBuffered(true);
     this.addKeyListener(key);
     this.setFocusable(true);
+    this.requestFocusInWindow();
 
     }
 
 
-    public void startgame()
-    {
-        gameThread = new Thread(this);
-        gameThread.start();
+    public void startgame() {
+        if (gameThread == null) { // Only start if no thread exists
+            gameThread = new Thread(this);
+            gameThread.start();
+        }
     }
 
     @Override

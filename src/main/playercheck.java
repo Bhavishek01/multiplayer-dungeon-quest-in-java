@@ -6,45 +6,39 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class playercheck {
+    private Connection conn = DatabaseConnection.getConnection();
+    private String playerid = null;
+    private boolean exists = false;
+    private boolean game_entered = false;
 
-    // Initialize database
-    Connection conn = DatabaseConnection.getConnection();
+    public void setPlayerId(String playerId) {
+        this.playerid = playerId;
+    }
 
-    String playerid = null ;
-    boolean exists  = false ;
+    public boolean isExists() {
+        return exists;
+    }
 
-    gamepannel gp = new gamepannel();
+    public boolean isGameEntered() {
+        return game_entered;
+    }
 
-    public void checkid() throws SQLException
-    {
+    public void setGameEntered(boolean gameEntered) {
+        this.game_entered = gameEntered;
+    }
+
+    public void checkid() throws SQLException {
+        if (playerid == null || playerid.isEmpty()) {
+            exists = false;
+            return;
+        }
         String query = "SELECT playerid FROM players WHERE playerid = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, playerid);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) 
-                {
-                    exists = true; // player exists in database
-                }
-                else
-                {
-                    exists = false; // player doesnt exists in database
-                }
+                exists = rs.next(); // true if player exists, false otherwise
             }
         }
-    }
-
-
-    public void startchecking()
-    {
-        
-
-    }
-
-    public void enterid()
-    {
-
-
-
     }
 
 }
