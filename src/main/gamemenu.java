@@ -13,21 +13,19 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import background.background;
+import background.loginphoto;
 
-public class gamemenu extends background implements ActionListener {
+public class gamemenu extends loginphoto implements ActionListener {
     private Font arial_40;
     private JButton single,multi,inventory,exit,loginmenu;
     private CardLayout cardLayout;
     private JPanel cardPanel;
-    private gamepannel gp; // Store gamepannel reference
+    private start st;
 
-    public gamemenu(CardLayout cardLayout, JPanel cardPanel, gamepannel gp) {
+    public gamemenu(CardLayout cardLayout, JPanel cardPanel,start start) {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
-        this.gp = gp;
-
-        
+        this.st = start;
 
         arial_40 = new Font("Arial", Font.BOLD, 25);
 
@@ -109,19 +107,21 @@ public class gamemenu extends background implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == single ) 
         {
-            cardLayout.show(cardPanel, "gamepannel");
-            cardPanel.revalidate(); // Ensure layout updates
-            cardPanel.repaint(); // Force repaint
-            gp.requestFocusInWindow();
-            gp.startgame(); // Directly call startgame on gamePanel
+            cardLayout.show(cardPanel, "start");
+            cardPanel.revalidate();
+            cardPanel.repaint();
+            st.requestFocusInWindow();
+            st.startgame();
+            
+
         }
         else if (e.getSource() == multi ) {
             
-            cardLayout.show(cardPanel, "gamepannel");
-            cardPanel.revalidate(); // Ensure layout updates
-            cardPanel.repaint(); // Force repaint
-            gp.requestFocusInWindow();
-            gp.startgame(); // Directly call startgame on gamePanel
+            cardLayout.show(cardPanel, "start");
+            cardPanel.revalidate();
+            cardPanel.repaint();
+            st.requestFocusInWindow();
+            st.startgame();
         }
         else if (e.getSource() == inventory ) {
             

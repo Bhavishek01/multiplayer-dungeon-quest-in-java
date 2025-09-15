@@ -14,9 +14,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import background.background;
+import background.loginphoto;
 
-public class loginornew extends background implements ActionListener {
+
+public class loginornew extends loginphoto implements ActionListener {
 
     private Font arial_40;
     private JButton login, new_player,exit;
@@ -27,6 +28,7 @@ public class loginornew extends background implements ActionListener {
 
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
+        
  
         // Fixed font: Use BOLD (CENTER_BASELINE isn't valid)
         arial_40 = new Font("Arial", Font.BOLD, 25);

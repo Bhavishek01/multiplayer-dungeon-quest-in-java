@@ -1,41 +1,49 @@
 package gameobj;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import main.gamepannel;
+import main.colisiondetection;
 import main.input;
 
-public class player extends entity{
+public class player extends entity {
 
-    gamepannel p;
+    
+    public int centerx , centery;
     input key;
+    colisiondetection cd;
 
-        public int centerx , centery;
-
-
-    public player(gamepannel p, input key){
-        this.p = p;
+    public player( input key,colisiondetection cd){
         this.key = key;
+        this.cd = cd;
 
-        centerx = (p.base/2)-p.tiles/2;
-        centery = ((p.height)/2)-p.tiles/2;
+        centerx = (base/2)-tiles/2;
+        centery = ((height)/2)-tiles/2;
+        
 
+        colisionarea = new Rectangle();
+
+        colisionarea.x = 15;
+        colisionarea.y = 10;
+        colisionarea.width = 18;
+        colisionarea.height = 33;
+        
         setDefaultValues();
         setimage();
     }
 
     
     public void setDefaultValues(){
-        player_map_X = 0;
-        player_map_Y = 0;
-        playerlife = 100;
-        playerspeed = 2;
-        status ="idle";
+        entity_map_X = 96;
+        entity_map_Y = 96;
+        entitylife = 100;
+        direction ="idle";
+
     }
     
     public void setimage(){
@@ -63,57 +71,76 @@ public class player extends entity{
 
     public void update()
     {
+
         if((key.up == false || key.down == false || key.left == false || key.right == false || key.attack == false))
+        {
+            count ++;
+            if(count >250)
             {
-                count ++;
-                if(count >250)
+                direction = "idle";
+            }
+        }
+
+        if(key.up == true || key.down == true || key.left == true || key.right == true || key.attack == true )
+        {
+            if(key.up == true)
+            {
+                direction ="up";
+            }
+            else if(key.down == true)
+            {
+                direction ="down";
+            }
+            else if(key.left == true)
+            {
+                direction ="left";
+            }
+            else if(key.right == true)
+            {
+                direction ="right";
+            }
+            else if(key.attack == true)
+            {
+                direction = "attack";
+                // attack animation 
+                // enemy ko life decrease if enemy sanga collide vaye
+            }
+            colision = false;
+            entityspeed = 3;
+            cd.checkcolision(this);
+            if(!colision)
+            {
+                switch(direction)
                 {
-                    status = "idle";
+                    case "up":
+                            entity_map_Y -= entityspeed;
+                            break;
+                    case "down":
+                            entity_map_Y += entityspeed;
+                            break;
+                    case "right":
+                            entity_map_X += entityspeed;
+                            break;
+                    case "left":
+                            entity_map_X -= entityspeed;
+                            break;
+                    case "attack":// attack animation
+                    break;
                 }
-                
+                    
             }
 
-        if(key.up == true || key.down == true || key.left == true || key.right == true || key.attack == true || status == "idle")
-    {
-        if(key.up == true)
-        {
-            status ="up";
-            player_map_Y -= playerspeed;
+            count ++;
+            if(count >12)
+            {
+                if(flip == 1)
+                {flip = 2;}
+                else 
+                {flip = 1;}
+            count = 0;
+            }
         }
-        else if(key.down == true)
-        {
-            status ="down";
-            player_map_Y += playerspeed;
-        }
-        else if(key.left == true)
-        {
-            status ="left";
-            player_map_X -= playerspeed;
-        }
-        else if(key.right == true)
-        {
-            status ="right";
-            player_map_X += playerspeed;
-        }
-        else if(key.attack == true)
-        {
-            status = "attack";
-            // attack animation 
-            // enemy ko life decrease if enemy sanga collide vaye
-        }
-        count ++;
-        if(count >12)
-        {
-            if(flip == 1)
-            {flip = 2;}
-            else 
-            {flip = 1;}
-        count = 0;
-        }
-
-
-    }
-        
+            
     }
 
     public void draw(Graphics2D g2)
@@ -121,55 +148,52 @@ public class player extends entity{
 
         BufferedImage image = null;
 
-        switch(status)
+        switch(direction)
         {
             case "up":
             if(flip ==1 )
                 image = up1;
             if(flip ==2 )
                 image = up2;
-            break;
-
+                break;
 
             case "down":
             if(flip == 1)
                 image = down1;
             if(flip ==2 )
                 image = down2;
-            break;
-
-               
+                break;
+   
             case "right":
             if(flip == 1)
                 image = right1;
             if(flip ==2 )
                 image = right2;
-            break;
+                break;
 
             case "left":
             if(flip == 1)
                 image = left1;
             if(flip ==2 )
                 image = left2;
-            break;
+                break;
 
             case "attack":
             if(flip == 1)
                 image = attack1;
             if(flip ==2 )
                 image = attack2;
-            break;
+                break;
 
             case "idle":
             if(flip == 1)
                 image = idle1;
             if(flip ==2 )
                 image = idle2;
-            break;
+                break;
         }
         
-        // g2.drawImage(image, player_map_X,player_map_Y, p.tiles,p.tiles,null);
-        g2.drawImage(image, centerx,centery, p.tiles,p.tiles,null);
+        g2.drawImage(image, centerx,centery, tiles,tiles,null);
 
     }
 }

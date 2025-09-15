@@ -17,9 +17,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import background.background;
+import background.loginphoto;
 
-public class newplayer extends background implements ActionListener {
+public class newplayer extends loginphoto implements ActionListener {
 
     private Font arial_40;
     private JLabel pl, pid, er;
@@ -35,6 +35,7 @@ public class newplayer extends background implements ActionListener {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
         this.pc = pc;
+        
 
         arial_40 = new Font("Arial", Font.BOLD, 25);
 

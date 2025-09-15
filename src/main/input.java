@@ -8,7 +8,6 @@ public class input implements KeyListener
 
     public boolean up,down,left,right,attack;
 
-
     @Override
     public void keyTyped(KeyEvent e) {}
 
@@ -19,6 +18,7 @@ public class input implements KeyListener
 
         if((get == KeyEvent.VK_W) || (get == KeyEvent.VK_UP)){
             up = true;
+            
         }
 
         if((get == KeyEvent.VK_S) || (get == KeyEvent.VK_DOWN)){
