@@ -32,7 +32,7 @@ public class player extends entity{
     
     public void setDefaultValues(){
         player_map_X = 0;
-        player_map_X = 0;
+        player_map_Y = 0;
         playerlife = 100;
         playerspeed = 2;
         status ="idle";
