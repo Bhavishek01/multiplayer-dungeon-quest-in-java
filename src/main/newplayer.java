@@ -7,8 +7,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
-import java.util.Random;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -27,14 +25,16 @@ public class newplayer extends loginphoto implements ActionListener {
     private JButton submitButton, start,back;
     private CardLayout cardLayout;
     private JPanel cardPanel;
-    private playercheck pc;
+    private GameClient gc;
+    public start st;
     int id;
     String pname, playerid;
 
-    public newplayer(CardLayout cardLayout, JPanel cardPanel, playercheck pc) {
-        this.cardLayout = cardLayout;
-        this.cardPanel = cardPanel;
-        this.pc = pc;
+    public newplayer(CardLayout cl, JPanel cp, GameClient client) {
+        this.cardLayout = cl;
+        this.cardPanel = cp;
+        this.gc = client;
+        
         
 
         arial_40 = new Font("Arial", Font.BOLD, 25);
@@ -59,6 +59,7 @@ public class newplayer extends loginphoto implements ActionListener {
         playername.setMaximumSize(new Dimension(labelSize.width, 40));
         playername.setAlignmentX(Component.CENTER_ALIGNMENT);
         playername.requestFocusInWindow();
+        playername.addActionListener(e -> enter());
         add(playername);
 
         add(Box.createRigidArea(new Dimension(0, 20)));
@@ -117,50 +118,51 @@ public class newplayer extends loginphoto implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == submitButton) {
-            pname = playername.getText().trim();
-
-            if (!pname.isEmpty()) {
-                try {
-                    pc.setPlayerId(pname);
-                    pc.checkplayername(pname);// Assuming checkid checks for name existence
-                    if (pc.isExists()) {
-                        playername.setText("");
-                        er.setVisible(true);
-                    } else {
-                        Random rand = new Random();
-                        id = rand.nextInt(255);
-                        playerid = pname + id;
-
-                        submitButton.setVisible(false);
-                        remove(submitButton);
-                        er.setVisible(false);
-                        remove(er);
-                        pid.setText("Your Player ID is " + playerid);
-                        pid.setVisible(true);
-                        start.setVisible(true);
-
-                        try {
-                            pc.addplayer(pname, playerid); // Assuming this method exists
-                        } catch (SQLException e1) {
-                            e1.printStackTrace();
-                        }
-
-                        revalidate(); // Update the layout
-                        repaint();    // Redraw the panel
-                    }
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                    playername.setBackground(Color.RED);
-                    er.setVisible(true);
-                }
-            }
-        } else if (e.getSource() == start) {
-            pc.setGameEntered(true);
+        if (e.getSource() == submitButton) 
+            {
+            enter();
+        }
+         else if (e.getSource() == start) {
+            gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gc);
+            newplayer newplayer = new newplayer(cardLayout, cardPanel,gc);
+            cardPanel.add(gamemenu, "gamemenu");
+            cardPanel.add(newplayer, "newplayer");
             cardLayout.show(cardPanel, "gamemenu"); // Changed to "gamepannel" assuming this is correct
         }
          else if (e.getSource() == back) {
             cardLayout.show(cardPanel, "loginornew");
         }
+    }
+
+    public void enter()
+    {
+        pname = playername.getText().trim();
+
+            if (!pname.isEmpty()) {
+                gc.send("REGISTER|"+ pname);
+                gc.send(pname);
+                
+                try 
+                {
+                    Thread.sleep(100);  // Pause for 1000 ms = .1 second
+                } catch (InterruptedException ae) {
+                ae.printStackTrace();
+            }
+                if (!gc.nameExists()) {
+                    playername.setText("");
+                    er.setVisible(true);
+                } else {
+
+                    submitButton.setVisible(false);
+                    remove(submitButton);
+                    er.setVisible(false);
+                    remove(er);
+                    pid.setText("Your Player ID is " + gc.id);
+                    pid.setVisible(true);
+                    start.setVisible(true);
+                    revalidate(); // Update the layout
+                    repaint();    // Redraw the panel
+                }
+            }
     }
 }

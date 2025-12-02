@@ -1,4 +1,4 @@
-package main;
+package socket_and_Jdbc;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,7 +15,7 @@ public class DatabaseConnection {
             String pass="";
             
             con = DriverManager.getConnection(url, user, pass);
-            System.out.println("connection established");
+            System.out.println("Database connection established");
 
             }
         catch (ClassNotFoundException | SQLException e) 
@@ -23,9 +23,5 @@ public class DatabaseConnection {
             e.printStackTrace();
             }
         return con; 
-    }
-
-    public static void main(String[] args) {
-        
     }
 }

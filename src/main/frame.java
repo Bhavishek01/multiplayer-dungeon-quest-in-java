@@ -17,30 +17,15 @@ public class frame{
         // Create CardLayout and container panel
         CardLayout cardLayout = new CardLayout();
         JPanel cardPanel = new JPanel(cardLayout);
-        playercheck playerCheck = new playercheck();
-
-        // Create panels
-        loginornew loginOrNewPanel = new loginornew(cardLayout, cardPanel);
-        start start = new start();
-        login loginPanel = new login(cardLayout, cardPanel,playerCheck);
-        gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, start);
-        newplayer newplayer = new newplayer(cardLayout, cardPanel,playerCheck);
         
-
-        // Add panels to cardPanel
+        loginornew loginOrNewPanel = new loginornew(cardLayout, cardPanel);
         cardPanel.add(loginOrNewPanel, "loginornew");
-        cardPanel.add(loginPanel, "login");
-        cardPanel.add(gamemenu, "gamemenu");
-        cardPanel.add(newplayer, "newplayer");
-        cardPanel.add(start, "start");
 
-        // Add cardPanel to frame
         f.add(cardPanel);
-        // cardLayout.show(cardPanel, "start");
-        cardLayout.show(cardPanel, "loginornew"); // Start with loginornew panel
+
+        cardLayout.show(cardPanel, "loginornew"); // Start with loginornew pane
 
         f.pack();
-
         f.setVisible(true);
         f.setLayout(null);
         f.setLocationRelativeTo(null);

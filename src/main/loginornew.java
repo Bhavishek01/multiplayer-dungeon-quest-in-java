@@ -23,11 +23,14 @@ public class loginornew extends loginphoto implements ActionListener {
     private JButton login, new_player,exit;
     private CardLayout cardLayout;
     private JPanel cardPanel;
+    GameClient gc = new GameClient();
+    JLabel connectionlost;
 
     public loginornew(CardLayout cardLayout, JPanel cardPanel) {
 
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
+        
         
  
         // Fixed font: Use BOLD (CENTER_BASELINE isn't valid)
@@ -85,21 +88,39 @@ public class loginornew extends loginphoto implements ActionListener {
 
         // Add flexible space below for vertical centering
         add(Box.createVerticalGlue());
+
+        connectionlost = new JLabel("Connection Lost...............");
+        connectionlost.setVisible(false);
+        connectionlost.setFont(arial_40);
+        connectionlost.setForeground(Color.WHITE);
+        connectionlost.setBackground(Color.BLACK);
+        connectionlost.setAlignmentY(Component.TOP_ALIGNMENT);
+        connectionlost.setAlignmentX(Component.CENTER_ALIGNMENT); // Center horizontally
+        add(connectionlost);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == login) 
+
+        if (e.getSource() == login && gc.connection())
         {
-            cardLayout.show(cardPanel, "login");
+        login loginPanel = new login(cardLayout, cardPanel,gc);
+        cardPanel.add(loginPanel, "login");
+        cardLayout.show(cardPanel, "login");
         }
-        else if (e.getSource() == new_player) 
+        else if (e.getSource() == new_player && gc.connection()) 
         {
-            cardLayout.show(cardPanel, "newplayer");
+            newplayer newplayer = new newplayer(cardLayout, cardPanel,gc);
+            cardPanel.add(newplayer, "newplayer");
+            cardLayout.show(cardPanel, "newplayer"); 
         }
-        else if (e.getSource() == exit ) {
-            
-            System.exit(0);    
+        else if (e.getSource() == exit) 
+        {
+            System.exit(0);
+        }
+        else
+        {
+            connectionlost.setVisible(true);
         }
     }
 }

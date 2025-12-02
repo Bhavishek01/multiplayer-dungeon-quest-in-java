@@ -6,7 +6,7 @@ import java.awt.event.KeyListener;
 public class input implements KeyListener
 {
 
-    public boolean up,down,left,right,attack;
+    public boolean up,down,left,right,attack,esc,enter,pause,item;
 
     @Override
     public void keyTyped(KeyEvent e) {}
@@ -16,9 +16,24 @@ public class input implements KeyListener
     {
         int get = e.getKeyCode();
 
+        if((get == KeyEvent.VK_P) ){
+            pause = true;
+        }
+
+        if((get == KeyEvent.VK_Q) ){
+            item = true;
+        }
+
+        if((get == KeyEvent.VK_ESCAPE) ){
+            esc = true;
+        }
+
+        if((get == KeyEvent.VK_ENTER) ){
+            enter = true;
+        }
+
         if((get == KeyEvent.VK_W) || (get == KeyEvent.VK_UP)){
-            up = true;
-            
+            up = true;   
         }
 
         if((get == KeyEvent.VK_S) || (get == KeyEvent.VK_DOWN)){
@@ -35,6 +50,7 @@ public class input implements KeyListener
         if(get == KeyEvent.VK_SPACE){
             attack = true;
         }
+
     }
 
     @Override
@@ -44,6 +60,22 @@ public class input implements KeyListener
 
         if((get == KeyEvent.VK_W) || (get == KeyEvent.VK_UP)){
             up = false;
+        }
+
+        if((get == KeyEvent.VK_Q) ){
+            item = false;
+        }
+
+        if((get == KeyEvent.VK_ESCAPE) ){
+            esc = false;
+        }
+
+        if((get == KeyEvent.VK_P) ){
+            pause = false;
+        }
+
+        if((get == KeyEvent.VK_ENTER) ){
+            enter = false;
         }
         
         if((get == KeyEvent.VK_S) || (get == KeyEvent.VK_DOWN)){
@@ -60,6 +92,7 @@ public class input implements KeyListener
         if(get == KeyEvent.VK_SPACE){
             attack = false;
         }
+
     }
     
 }
