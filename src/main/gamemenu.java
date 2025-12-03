@@ -22,13 +22,15 @@ import background.loginphoto;
 public class gamemenu extends loginphoto implements ActionListener {
     private Font arial_40,arial_50,arial_30;
     private JButton single,multi,inventory,exit,loginmenu;
-    private CardLayout cardLayout;
-    private JPanel cardPanel;
+    public CardLayout cardLayout;
+    public JPanel cardPanel;
     JLabel name,promptLabel,id;
+    GameClient gc;
 
     public gamemenu(CardLayout cardLayout, JPanel cardPanel,GameClient gc) {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
+        this.gc = gc;
 
 
         setLayout(new BorderLayout());
@@ -145,26 +147,27 @@ public class gamemenu extends loginphoto implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        start st = new start();
+        gamehandler gh = new gamehandler(cardLayout,cardPanel,gc);
         
-        if (e.getSource() == single ) 
+        if (e.getSource() == single )
         {
-            cardPanel.add(st, "start");
-            cardLayout.show(cardPanel, "start");
+            
+            cardPanel.add(gh, "gamehandler");
+            cardLayout.show(cardPanel, "gamehandler");
             cardPanel.revalidate();
             cardPanel.repaint();
-            st.requestFocusInWindow();
-            st.startgame();
+            gh.requestFocusInWindow();
+            gh.startgame();
             
         }
         else if (e.getSource() == multi ) {
 
-            cardPanel.add(st, "start");
-            cardLayout.show(cardPanel, "start");
+            cardPanel.add(gh, "gamehandler");
+            cardLayout.show(cardPanel, "gamehandler");
             cardPanel.revalidate();
             cardPanel.repaint();
-            st.requestFocusInWindow();
-            st.startgame();
+            gh.requestFocusInWindow();
+            gh.startgame();
         }
         else if (e.getSource() == inventory ) {
             

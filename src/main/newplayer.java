@@ -26,7 +26,7 @@ public class newplayer extends loginphoto implements ActionListener {
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private GameClient gc;
-    public start st;
+
     int id;
     String pname, playerid;
 
@@ -124,9 +124,7 @@ public class newplayer extends loginphoto implements ActionListener {
         }
          else if (e.getSource() == start) {
             gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gc);
-            newplayer newplayer = new newplayer(cardLayout, cardPanel,gc);
             cardPanel.add(gamemenu, "gamemenu");
-            cardPanel.add(newplayer, "newplayer");
             cardLayout.show(cardPanel, "gamemenu"); // Changed to "gamepannel" assuming this is correct
         }
          else if (e.getSource() == back) {

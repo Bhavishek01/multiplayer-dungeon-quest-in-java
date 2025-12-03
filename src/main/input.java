@@ -6,7 +6,7 @@ import java.awt.event.KeyListener;
 public class input implements KeyListener
 {
 
-    public boolean up,down,left,right,attack,esc,enter,pause,item;
+    public boolean up,down,left,right,attack,resume,enter,pause,item;
 
     @Override
     public void keyTyped(KeyEvent e) {}
@@ -20,12 +20,12 @@ public class input implements KeyListener
             pause = true;
         }
 
-        if((get == KeyEvent.VK_Q) ){
+        if((get == KeyEvent.VK_E) ){
             item = true;
         }
 
-        if((get == KeyEvent.VK_ESCAPE) ){
-            esc = true;
+        if((get == KeyEvent.VK_Q) ){
+            resume = true;
         }
 
         if((get == KeyEvent.VK_ENTER) ){
@@ -62,12 +62,12 @@ public class input implements KeyListener
             up = false;
         }
 
-        if((get == KeyEvent.VK_Q) ){
+        if((get == KeyEvent.VK_E) ){
             item = false;
         }
 
-        if((get == KeyEvent.VK_ESCAPE) ){
-            esc = false;
+        if((get == KeyEvent.VK_Q) ){
+            resume = false;
         }
 
         if((get == KeyEvent.VK_P) ){

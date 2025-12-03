@@ -49,7 +49,6 @@ public class colisiondetection extends gamepannel{
             int tileType = gh.bgm.Maprowcol[row][col];
             if (tileType != 2 && tileType != 3) { // Non-ground tiles (0=wall, 1=stone, 3=water) are collidable
                 entity.colision = true;
-                System.out.println("collision");
                 return;
                  // Exit early if any collidable tile is found
             }

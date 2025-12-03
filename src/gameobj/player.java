@@ -9,6 +9,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import main.colisiondetection;
+import main.gamehandler;
 import main.input;
 
 public class player extends entity {
@@ -17,10 +18,12 @@ public class player extends entity {
     public int centerx , centery;
     input key;
     colisiondetection cd;
+    public gamehandler gh;
 
-    public player( input key,colisiondetection cd){
+    public player( input key,colisiondetection cd, gamehandler gh){
         this.key = key;
         this.cd = cd;
+        this.gh = gh;
 
         centerx = (base/2)-tiles/2;
         centery = ((height)/2)-tiles/2;
@@ -43,7 +46,7 @@ public class player extends entity {
         entity_map_Y = 96;
         entitylife = 100;
         direction ="idle";
-
+        gh.ispaused = false;
     }
     
     public void setimage(){
@@ -71,76 +74,7 @@ public class player extends entity {
 
     public void update()
     {
-
-        if((key.up == false || key.down == false || key.left == false || key.right == false || key.attack == false))
-        {
-            count ++;
-            if(count >250)
-            {
-                direction = "idle";
-            }
-        }
-
-        if(key.up == true || key.down == true || key.left == true || key.right == true || key.attack == true )
-        {
-            if(key.up == true)
-            {
-                direction ="up";
-            }
-            else if(key.down == true)
-            {
-                direction ="down";
-            }
-            else if(key.left == true)
-            {
-                direction ="left";
-            }
-            else if(key.right == true)
-            {
-                direction ="right";
-            }
-            else if(key.attack == true)
-            {
-                direction = "attack";
-                // attack animation 
-                // enemy ko life decrease if enemy sanga collide vaye
-            }
-            colision = false;
-            entityspeed = 3;
-            cd.checkcolision(this);
-            if(!colision)
-            {
-                switch(direction)
-                {
-                    case "up":
-                            entity_map_Y -= entityspeed;
-                            break;
-                    case "down":
-                            entity_map_Y += entityspeed;
-                            break;
-                    case "right":
-                            entity_map_X += entityspeed;
-                            break;
-                    case "left":
-                            entity_map_X -= entityspeed;
-                            break;
-                    case "attack":// attack animation
-                    break;
-                }
-                    
-            }
-
-            count ++;
-            if(count >12)
-            {
-                if(flip == 1)
-                {flip = 2;}
-                else 
-                {flip = 1;}
-            count = 0;
-            }
-        }
-            
+        checkplayer();       
     }
 
     public void draw(Graphics2D g2)
@@ -195,5 +129,98 @@ public class player extends entity {
         
         g2.drawImage(image, centerx,centery, tiles,tiles,null);
 
+    }
+
+    public void checkplayer()
+    {
+        if (gh.ispaused) {
+        direction = "idle";  // NEW: Stop player movement when paused
+        return;  // NEW: Skip all input processing
+        }
+
+        if (key.pause == true) {
+            if (!gh.paused) {
+                gh.ispaused = true;
+                key.pause = false;  // NEW: Reset to prevent instant re-pause
+            }
+        }
+
+        if (key.resume == true) {
+            if (gh.ispaused == true) {  // Simplified, removed isresumed
+                gh.ispaused = false;
+                key.resume = false;  // NEW: Reset
+            } else {
+                direction = "idle";
+            }
+        }
+        if((key.up == false || key.down == false || key.left == false || key.right == false || key.attack == false))
+        {
+            count ++;
+            if(count >250)
+            {
+                direction = "idle";
+            }
+        }
+
+        if(key.up == true || key.down == true || key.left == true || key.right == true || key.attack == true )
+        {
+            if(key.up == true)
+            {
+                direction ="up";
+            }
+            else if(key.down == true)
+            {
+                direction ="down";
+            }
+            else if(key.left == true)
+            {
+                direction ="left";
+            }
+            else if(key.right == true)
+            {
+                direction ="right";
+            }
+            else if(key.attack == true)
+            {
+                direction = "attack";
+                // attack animation 
+                // enemy ko life decrease if enemy sanga collide vaye
+            }
+
+            colision = false;
+            entityspeed = 3;
+            cd.checkcolision(this);
+            if(!colision )
+            {
+                switch(direction)
+                {
+                    case "up":
+                            entity_map_Y -= entityspeed;
+                            break;
+                    case "down":
+                            entity_map_Y += entityspeed;
+                            break;
+                    case "right":
+                            entity_map_X += entityspeed;
+                            break;
+                    case "left":
+                            entity_map_X -= entityspeed;
+                            break;
+                    case "attack":// attack animation
+                    break;
+                }
+                    
+            }
+
+            count ++;
+            if(count >12)
+            {
+                if(flip == 1)
+                {flip = 2;}
+                else 
+                {flip = 1;}
+            count = 0;
+            }
+        }
     }
 }
