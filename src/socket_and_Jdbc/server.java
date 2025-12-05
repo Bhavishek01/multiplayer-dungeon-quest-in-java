@@ -14,10 +14,8 @@ public class server {
             System.out.println("Server is listening... Waiting for players...\n");
 
             while (true) {
-                Socket clientSocket = serverSocket.accept(); // Wait for a player
-                System.out.println("New player connected! -> " + clientSocket.getInetAddress());
+                Socket clientSocket = serverSocket.accept(); 
 
-                // Give each player their own handler thread
                 ClientHandler handler = new ClientHandler(clientSocket);
                 new Thread(handler).start();
             }

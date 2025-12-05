@@ -74,7 +74,15 @@ public class player extends entity {
 
     public void update()
     {
-        checkplayer();       
+        checkplayer();  
+
+        
+
+                if (gh.gc != null && gh.gc.connection()) 
+                    {
+                        String posMsg = "POS|" + entity_map_X + "|" + entity_map_Y + "|" + direction;
+                        gh.gc.send(posMsg);
+                    }
     }
 
     public void draw(Graphics2D g2)

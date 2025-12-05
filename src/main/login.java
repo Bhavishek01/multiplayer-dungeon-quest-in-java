@@ -24,9 +24,9 @@ public class login extends loginphoto implements ActionListener {
     private JButton submitButton,back;
     private CardLayout cardLayout;
     private JPanel cardPanel;
-    private GameClient gc;    
+    private gameclient gc;    
 
-    public login(CardLayout cardLayout, JPanel cardPanel,GameClient gc) {
+    public login(CardLayout cardLayout, JPanel cardPanel,gameclient gc) {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
         this.gc = gc;

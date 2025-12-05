@@ -21,13 +21,13 @@ import background.loginphoto;
 
 public class gamemenu extends loginphoto implements ActionListener {
     private Font arial_40,arial_50,arial_30;
-    private JButton single,multi,inventory,exit,loginmenu;
+    private JButton single,inventory,exit,loginmenu;
     public CardLayout cardLayout;
     public JPanel cardPanel;
     JLabel name,promptLabel,id;
-    GameClient gc;
+    gameclient gc;
 
-    public gamemenu(CardLayout cardLayout, JPanel cardPanel,GameClient gc) {
+    public gamemenu(CardLayout cardLayout, JPanel cardPanel,gameclient gc) {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
         this.gc = gc;
@@ -78,7 +78,7 @@ public class gamemenu extends loginphoto implements ActionListener {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         add(Box.createVerticalGlue());
 
-        single = new JButton("Single Player");
+        single = new JButton("Start Game");
         single.setFont(arial_40);
         single.setBorderPainted(true);
         single.setBackground(Color.BLACK);
@@ -87,19 +87,6 @@ public class gamemenu extends loginphoto implements ActionListener {
         single.setAlignmentX(Component.CENTER_ALIGNMENT);
         single.addActionListener(this);
         add(single);
-
-
-        add(Box.createRigidArea(new Dimension(0, 20)));
-
-        multi = new JButton("Multi Player");
-        multi.setFont(arial_40);
-        multi.setBorderPainted(true);
-        multi.setBackground(Color.BLACK);
-        multi.setForeground(Color.WHITE);
-        multi.setOpaque(false);
-        multi.setAlignmentX(Component.CENTER_ALIGNMENT);
-        multi.addActionListener(this);
-        add(multi);
 
 
         add(Box.createRigidArea(new Dimension(0, 20)));
@@ -140,8 +127,6 @@ public class gamemenu extends loginphoto implements ActionListener {
 
         add(Box.createVerticalGlue());
 
-        System.out.println("name added" + gc.name);
-
     }
 
     @Override
@@ -159,15 +144,6 @@ public class gamemenu extends loginphoto implements ActionListener {
             gh.requestFocusInWindow();
             gh.startgame();
             
-        }
-        else if (e.getSource() == multi ) {
-
-            cardPanel.add(gh, "gamehandler");
-            cardLayout.show(cardPanel, "gamehandler");
-            cardPanel.revalidate();
-            cardPanel.repaint();
-            gh.requestFocusInWindow();
-            gh.startgame();
         }
         else if (e.getSource() == inventory ) {
             

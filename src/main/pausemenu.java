@@ -16,14 +16,15 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import background.pausebackground;
 
-public class pausemenu extends JPanel implements ActionListener {
+public class pausemenu extends pausebackground implements ActionListener {
     private JButton resume, backToMenu, exit;
     private Font arial_40;
     CardLayout cardLayout;
     JPanel cardPanel;
     public gamehandler gh;
-    GameClient gc;
+    gameclient gc;
 
     public pausemenu( CardLayout cl, JPanel cp,gamehandler gh) {
 
@@ -42,8 +43,6 @@ public class pausemenu extends JPanel implements ActionListener {
             }
         }); 
 
-        setBackground(Color.black);
-        setOpaque(false);
         
         arial_40 = new Font("Arial", Font.BOLD, 25);
 

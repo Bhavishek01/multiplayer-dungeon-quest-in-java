@@ -25,12 +25,12 @@ public class newplayer extends loginphoto implements ActionListener {
     private JButton submitButton, start,back;
     private CardLayout cardLayout;
     private JPanel cardPanel;
-    private GameClient gc;
+    private gameclient gc;
 
     int id;
     String pname, playerid;
 
-    public newplayer(CardLayout cl, JPanel cp, GameClient client) {
+    public newplayer(CardLayout cl, JPanel cp, gameclient client) {
         this.cardLayout = cl;
         this.cardPanel = cp;
         this.gc = client;

@@ -2,8 +2,10 @@ package main;
 
 import java.io.*;
 import java.net.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class GameClient {
+public class gameclient {
 
     private Socket socket;
     private PrintWriter out;
@@ -12,7 +14,20 @@ public class GameClient {
     public boolean nameexists = false;
     public String name;
     public String id;
+
     public boolean connection = false;
+    public Map<String, OtherPlayer> otherPlayers = new ConcurrentHashMap<>();
+    public gamehandler gameHandler;
+
+    
+
+    public static class OtherPlayer 
+    {
+        public int x, y;
+        public String direction;
+        public String name;
+        public long lastUpdate = System.currentTimeMillis();
+    }
     
 
     public boolean idExists() {
@@ -27,9 +42,9 @@ public class GameClient {
         return nameexists;
     }
 
-    public GameClient() {
+    public gameclient() {
         try {
-            socket = new Socket("Localhost", 5555);
+            socket = new Socket("192.168.1.68", 5555);
             connection = true;
             System.out.println("Connected to server!");
             out = new PrintWriter(socket.getOutputStream(), true);
@@ -60,17 +75,21 @@ public class GameClient {
         if (parts.length == 0) return;
 
         switch (parts[0]) {
-            case "LOGIN_SUCCESS":
+            case "WORLD":
+                    if (gameHandler != null) 
+                        {
+                            gameHandler.updateOtherPlayers(message);
+                        }
+                    break;
                 
+            case "LOGIN_SUCCESS":
+                        
                     this.name = parts[2];
-                    this.id = parts[1];
+                    this.id = parts[1];                        
                     idexists = true;
 
-                    System.out.println("name added    " + name);
-                    System.out.println("id added   " + id);
-                    
-                
-                break;
+                    System.out.println("player " + name + " connected");
+                    break;
 
             case "REGISTER_SUCCESS":
                 
@@ -89,7 +108,6 @@ public class GameClient {
                 break;
 
             case "ERROR":
-                
                 break;
 
             default:
@@ -113,4 +131,10 @@ public class GameClient {
             e.printStackTrace();
         }
     }
+
+    public void setGameHandler(gamehandler gh) 
+    {
+        this.gameHandler = gh;
+    }
+
 }

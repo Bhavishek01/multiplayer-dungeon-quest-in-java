@@ -23,7 +23,7 @@ public class loginornew extends loginphoto implements ActionListener {
     private JButton login, new_player,exit;
     private CardLayout cardLayout;
     private JPanel cardPanel;
-    GameClient gc = new GameClient();
+    gameclient gc = new gameclient();
     JLabel connectionlost;
 
     public loginornew(CardLayout cardLayout, JPanel cardPanel) {

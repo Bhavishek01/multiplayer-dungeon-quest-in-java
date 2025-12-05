@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 
 
 public class frame{
-
+ 
     public static void main(String[] args) {
 
         JFrame f = new JFrame("Doungen quest");
