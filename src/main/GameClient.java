@@ -44,7 +44,7 @@ public class gameclient {
 
     public gameclient() {
         try {
-            socket = new Socket("192.168.1.68", 5555);
+            socket = new Socket("localhost", 5555);
             connection = true;
             System.out.println("Connected to server!");
             out = new PrintWriter(socket.getOutputStream(), true);
