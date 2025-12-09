@@ -158,6 +158,7 @@ public class newplayer extends loginphoto implements ActionListener {
                     pid.setText("Your Player ID is " + gc.id);
                     pid.setVisible(true);
                     start.setVisible(true);
+                    back.setVisible(false);
                     revalidate(); // Update the layout
                     repaint();    // Redraw the panel
                 }

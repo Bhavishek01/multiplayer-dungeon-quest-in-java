@@ -107,6 +107,7 @@ public class login extends loginphoto implements ActionListener {
 
         String playerId = playerIdField.getText().trim();
             gc.send("LOGIN|" + playerId);
+            System.out.println(playerId);
 
             try 
             {

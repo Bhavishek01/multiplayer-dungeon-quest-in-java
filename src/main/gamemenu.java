@@ -21,7 +21,7 @@ import background.loginphoto;
 
 public class gamemenu extends loginphoto implements ActionListener {
     private Font arial_40,arial_50,arial_30;
-    private JButton single,inventory,exit,loginmenu;
+    private JButton single,inventory,exit;  //,loginmenu;
     public CardLayout cardLayout;
     public JPanel cardPanel;
     JLabel name,promptLabel,id;
@@ -113,17 +113,17 @@ public class gamemenu extends loginphoto implements ActionListener {
         exit.addActionListener(this);
         add(exit);
 
-        add(Box.createRigidArea(new Dimension(0, 20)));
+        // add(Box.createRigidArea(new Dimension(0, 20)));
 
-        loginmenu = new JButton("Logout");
-        loginmenu.setFont(arial_40);
-        loginmenu.setBorderPainted(true);
-        loginmenu.setBackground(Color.BLACK);
-        loginmenu.setForeground(Color.WHITE);
-        loginmenu.setOpaque(false);
-        loginmenu.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loginmenu.addActionListener(this);
-        add(loginmenu);
+        // loginmenu = new JButton("Logout");
+        // loginmenu.setFont(arial_40);
+        // loginmenu.setBorderPainted(true);
+        // loginmenu.setBackground(Color.BLACK);
+        // loginmenu.setForeground(Color.WHITE);
+        // loginmenu.setOpaque(false);
+        // loginmenu.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // loginmenu.addActionListener(this);
+        // add(loginmenu);
 
         add(Box.createVerticalGlue());
 
@@ -132,10 +132,11 @@ public class gamemenu extends loginphoto implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        gamehandler gh = new gamehandler(cardLayout,cardPanel,gc);
+        
         
         if (e.getSource() == single )
         {
+            gamehandler gh = new gamehandler(cardLayout,cardPanel,gc);
             
             cardPanel.add(gh, "gamehandler");
             cardLayout.show(cardPanel, "gamehandler");
@@ -143,7 +144,6 @@ public class gamemenu extends loginphoto implements ActionListener {
             cardPanel.repaint();
             gh.requestFocusInWindow();
             gh.startgame();
-            
         }
         else if (e.getSource() == inventory ) {
             
@@ -153,9 +153,9 @@ public class gamemenu extends loginphoto implements ActionListener {
             
             System.exit(0);    
         }
-        else if (e.getSource() == loginmenu ) {
+    //     else if (e.getSource() == loginmenu ) {
             
-            cardLayout.show(cardPanel, "loginornew"); // Start with loginornew panel
-        }
+    //         cardLayout.show(cardPanel, "loginornew"); // Start with loginornew panel
+    //     }
     }
 }

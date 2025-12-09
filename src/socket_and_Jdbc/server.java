@@ -7,6 +7,7 @@ public class server {
 
     private static final int PORT = 5555;
 
+    
     public static void main(String[] args) {
         System.out.println("=== Dungeon Quest Server Starting on port " + PORT + " ===");
 

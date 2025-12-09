@@ -1,11 +1,196 @@
-                        Multiplayer Doungen Quest
+Multiplayer Doungen Quest
 
-    1. create game loop
-    2. create game objects
-                1. player
-                2. enemy
-                3. obctacles
-    3. control player
-    4. enemy loop
-    6. create Map
-    7. run this much
+
+1. creating a single player game
+
+	phase 1: create frame/pannels and add inputs
+		jframe and jpannels
+		create a class that takes in inputs
+
+	phase 2: create game loop and add inputs to it
+		thread that refress screen every 60 frames per second
+		add the inputs in this class
+
+	phase 3: add gameobject
+		create a class gameobject with life,direction and every things that a game character might have
+		extend that class to create player 
+		later do same for npc and enemy
+
+	phase 4: add background 
+		create a background class that contains image or background
+		
+	phase 5: add collision detection form youtube video
+
+	phase 6: run the game
+		this should be the singleplayer mode with one player and map where player cannot go out of bounds
+		and the player has to follow the map
+
+	/*					completion
+
+		this marks the completion of the actual phase 1.
+		when we run the code the game runs with a players t
+		hat runs around the map and cant get through the map
+	*/
+
+        
+
+
+2. AFter game runs with map but limited to singleplayer
+
+	phase 1: DB Table
+		table with player name and id
+		player use their existing account to save their game items
+		players have to create a new account to playe game
+
+	Phase 2: creating interface for new and old players
+		use a game image as background
+		create a window for new and old players (login and new player)
+		create a pannel for login
+		create a pannel for new player
+		create a game menu pannel
+
+	Phase 3:  add login and new player authentication using database
+		create a new package for jdbc
+		class that can add players, check playerid and name for login and new player
+		/*   
+			note: new players cant use old players name
+			logic:
+			if every player have a different name we can append a rand number to those names meaning every
+			playerid is unique
+		*/
+
+	Phase 4-5: implement jdbc logic and game enter logic upto gamemenu
+		focus on game menu:
+			single player
+			multiplayer
+			inventory
+			exit
+			logout
+		focus only on these 5, priotity is order based
+
+	/*					completion
+
+		this marks the completion of the actual phase 2.
+		now when we run the code the game a login page pop up 
+		login-> need to enter your playerid to enter game
+		register-> enter your name if name exists add something to your name then enter game
+			game menu:
+				single player -> runs game
+				multi player -> runs same game 
+				inventory -> nohing
+				exit -> exits game
+				logout -> sends you to old or new player
+	*/
+
+
+
+
+3. implement multiplayer 
+
+	phase 1: add a new package socket and create server and client
+		create a new server class that creates a clienthandler for each clients
+		create a new clent class that sends players location
+
+	phase 3: client logic
+		sends player location with pos in fornt of it
+		/*		pos|x|y		*/
+
+	Phase 3-4: create a clienthandler and its logic
+		use static to add client in the lists
+		it accepts clients and check message if its initail character is pos then its position
+		send the player location to all the players in the list
+
+	/*					completion
+
+		this marks the completion of the actual phase 3.
+		now when we run the code the game a login page pop up 
+		login-> need to enter your playerid to enter game
+		register-> enter your name if name exists add something to your name then enter game
+			game menu:
+				single player -> runs game
+				multi player -> runs multiplayer mode
+				inventory -> nohing
+				exit -> exits game
+				logout -> sends you to old or new player
+	*/
+
+	
+4. implement jdbc in server
+
+	phase 1: combine the socket and jdbc
+		add jdbc code in socket package
+		now the clienthandler will handle the jdbc connection and login and register
+	
+	phase 2-3: add login,register logic and add connecting in the pannel
+		now the client will send playerid with login keyword and player name with name keyword
+		/*   login|playerid		*/
+		/*   name|playername		*/
+		extract id or name form the clent message
+		same logic that check the name with database and
+		hanndle the wrong name,id and server error by send msg with distint keyword
+
+	/*					completion
+
+		this marks the completion of the actual phase 4.
+		now when we run the code the game a login page pop up 
+		login-> need to enter your playerid to enter game
+		register-> enter your name if name exists add something to your name then enter game
+			game menu:
+				single player -> runs game
+				multi player -> runs multiplayer mode
+				inventory -> nohing
+				exit -> exits game
+				logout -> sends you to old or new player
+
+		same but the login and resister auth is done in server
+		now we have a multiplayer game with better security
+	*/
+
+5. making inventory pannel and adding items in databsae
+
+
+
+5. Arrow hits player/enemy → -20 HP, red flash, popup "-20"
+	Health bars above everyone (green/red fill)
+	Dead? Respawn at start.
+
+
+	AFter multiplayer is added
+	Phase 1: DB Table (1 hour)
+
+	CREATE TABLE player_inventory (playerid VARCHAR(50), item_name VARCHAR(50), quantity INT);
+	Load on login, save on equip/use/logout.
+
+	Phase 2-3: Inventory UI + E-Key Overlay (1 day)
+
+	Small JPanel overlay (not full screen switch)
+	Buttons: "Sword (x3)", "Arrow (x10)", "Potion (x5)"
+	Visual: grid with icons + counts.
+
+	Phase 4-5: Inventory Events + ESC/Q Close (Half day)
+
+	"Equip" → sets p1.equippedWeapon = "arrow"
+	ESC/Q → hide overlay, resume game.
+
+	Phase 6: Mouse Shoot (HUGE WOW) (1 day)
+
+	Click anywhere → arrow flies toward mouse (3-5 tiles max)
+	Yellow dot trails + poof on wall/hit
+	Sync: "SHOOT|mouseWorldX|mouseWorldY"
+
+	Phase 7: Chasing Enemies (1-2 days)
+
+	3-5 goblins spawn random
+	Detect players in 5-tile radius → chase closest
+	Server tracks enemy pos too ("ENEMY_MOVE|ex|ey")
+
+	Phase 8: Enemy Shoots Back (1 day)
+
+	Enemy faces player → shoots slow blob every 2 sec
+	Same projectile code, just enemy-origin.
+
+	Phase 9: Projectile Collisions + Health (1 day)
+
+	Arrow hits player/enemy → -20 HP, red flash, popup "-20"
+	Health bars above everyone (green/red fill)
+	Dead? Respawn at start.

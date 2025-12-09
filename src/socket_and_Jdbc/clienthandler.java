@@ -29,8 +29,9 @@ class ClientHandler implements Runnable {
 
             String message;
             while ((message = in.readLine()) != null) {
-                
+             System.out.println(message);
                 if (playerId == null) {
+                   
                     handleLogin(message);
                 } else {
                     handleGameMessage(message);
@@ -56,7 +57,8 @@ class ClientHandler implements Runnable {
                     checker.checkplayerid(playerId);
                     if (checker.idExists()) 
                         {
-                            playerName = checker.giveplayername(playerId);                        
+                            playerName = checker.giveplayername(playerId);          
+                            System.out.println(playerName + "logined");              
                             out.println("LOGIN_SUCCESS|" + playerId + "|" + playerName);
                             System.out.println("client added: " + playerId);
                             allClients.add(this);
@@ -64,6 +66,7 @@ class ClientHandler implements Runnable {
                         else 
                             {
                                 out.println("IAgain");
+                                playerId = null;
                             }
                 }
                 else if ("REGISTER".equals(parts[0])) 
@@ -73,6 +76,7 @@ class ClientHandler implements Runnable {
                     if (checker.nameExists()) 
                     {
                         out.println("NAgain");
+                        playerName = null;
                     }
                     else
                     {

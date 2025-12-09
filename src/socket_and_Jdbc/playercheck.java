@@ -29,6 +29,7 @@ public class playercheck {
         String query = "SELECT playerid FROM players WHERE playerid = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, id);
+            System.out.println(id + "checking");
             try (ResultSet rs = pstmt.executeQuery()) {
                 idexists = rs.next(); // true if player exists, false otherwise
             }
@@ -44,6 +45,7 @@ public class playercheck {
     String query = "SELECT playername FROM players WHERE playername = ?";
     try (PreparedStatement pstmt = conn.prepareStatement(query)) {
         pstmt.setString(1, name);
+        System.out.println(name + "checking");
         try (ResultSet rs = pstmt.executeQuery()) {
             nameexists = rs.next(); // true if a row with the name exists, false otherwise
         }
