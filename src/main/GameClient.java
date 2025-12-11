@@ -19,8 +19,6 @@ public class gameclient {
     public Map<String, OtherPlayer> otherPlayers = new ConcurrentHashMap<>();
     public gamehandler gameHandler;
 
-    
-
     public static class OtherPlayer 
     {
         public int x, y;
@@ -29,7 +27,6 @@ public class gameclient {
         public long lastUpdate = System.currentTimeMillis();
     }
     
-
     public boolean idExists() {
         return idexists;
     }
@@ -115,14 +112,12 @@ public class gameclient {
                 break;
         }
     }
-
     // Send any message to server
     public void send(String message) {
         if (out != null) {
             out.println(message);
         }
     }
-
     // Close connection (call when game quits)
     public void disconnect() {
         try {
@@ -131,7 +126,6 @@ public class gameclient {
             e.printStackTrace();
         }
     }
-
     public void setGameHandler(gamehandler gh) 
     {
         this.gameHandler = gh;

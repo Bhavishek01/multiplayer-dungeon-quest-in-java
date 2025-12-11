@@ -127,6 +127,3 @@ public class pausemenu extends pausebackground implements ActionListener {
         gh.requestFocusInWindow();  // NEW: Ensure gamehandler gets focus for inputs
     }
 }
-
-
-

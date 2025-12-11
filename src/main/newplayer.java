@@ -7,7 +7,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -17,8 +16,8 @@ import javax.swing.JTextField;
 
 import background.loginphoto;
 
-public class newplayer extends loginphoto implements ActionListener {
-
+public class newplayer extends loginphoto implements ActionListener 
+{
     private Font arial_40;
     private JLabel pl, pid, er;
     private JTextField playername;
@@ -34,8 +33,6 @@ public class newplayer extends loginphoto implements ActionListener {
         this.cardLayout = cl;
         this.cardPanel = cp;
         this.gc = client;
-        
-        
 
         arial_40 = new Font("Arial", Font.BOLD, 25);
 
@@ -136,32 +133,35 @@ public class newplayer extends loginphoto implements ActionListener {
     {
         pname = playername.getText().trim();
 
-            if (!pname.isEmpty()) {
-                gc.send("REGISTER|"+ pname);
-                gc.send(pname);
-                
-                try 
+            if (!pname.isEmpty()) 
                 {
-                    Thread.sleep(100);  // Pause for 1000 ms = .1 second
-                } catch (InterruptedException ae) {
-                ae.printStackTrace();
-            }
-                if (!gc.nameExists()) {
-                    playername.setText("");
-                    er.setVisible(true);
-                } else {
+                    gc.send("REGISTER|"+ pname);
+                    gc.send(pname); 
+                    try 
+                    {
+                        Thread.sleep(100);  // Pause for 1000 ms = .1 second
+                    } catch (InterruptedException ae) {
+                    ae.printStackTrace();
+                    }
 
-                    submitButton.setVisible(false);
-                    remove(submitButton);
-                    er.setVisible(false);
-                    remove(er);
-                    pid.setText("Your Player ID is " + gc.id);
-                    pid.setVisible(true);
-                    start.setVisible(true);
-                    back.setVisible(false);
-                    revalidate(); // Update the layout
-                    repaint();    // Redraw the panel
+                    if (!gc.nameExists()) 
+                        {
+                        playername.setText("");
+                        er.setVisible(true);
+                        } 
+                        else 
+                        {
+                        submitButton.setVisible(false);
+                        remove(submitButton);
+                        er.setVisible(false);
+                        remove(er);
+                        pid.setText("Your Player ID is " + gc.id);
+                        pid.setVisible(true);
+                        start.setVisible(true);
+                        back.setVisible(false);
+                        revalidate(); // Update the layout
+                        repaint();    // Redraw the panel
+                    }
                 }
-            }
     }
 }

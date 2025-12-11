@@ -7,14 +7,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
 import background.loginphoto;
 
 public class login extends loginphoto implements ActionListener {
@@ -89,7 +87,6 @@ public class login extends loginphoto implements ActionListener {
         back.addActionListener(this);
         add(back);
     }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == submitButton)
@@ -104,7 +101,6 @@ public class login extends loginphoto implements ActionListener {
 
     public void submit()
     {
-
         String playerId = playerIdField.getText().trim();
             gc.send("LOGIN|" + playerId);
             System.out.println(playerId);
@@ -137,4 +133,3 @@ public class login extends loginphoto implements ActionListener {
             }
         }
     }
-

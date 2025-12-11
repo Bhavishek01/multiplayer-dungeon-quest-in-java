@@ -22,7 +22,8 @@ class ClientHandler implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void run() 
+    {
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -107,7 +108,6 @@ class ClientHandler implements Runnable {
                     this.y = Integer.parseInt(parts[2]);
                     this.direction = parts[3];
                     broadcastWorld();  // Send updated world to everyone
-
                 } 
                 catch (Exception ignored) {}
     }

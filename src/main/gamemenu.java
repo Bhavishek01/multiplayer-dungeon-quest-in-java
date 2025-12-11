@@ -8,7 +8,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -32,13 +31,11 @@ public class gamemenu extends loginphoto implements ActionListener {
         this.cardPanel = cardPanel;
         this.gc = gc;
 
-
         setLayout(new BorderLayout());
 
         arial_40 = new Font("Arial", Font.BOLD, 25);
         arial_30 = new Font("Arial", Font.BOLD, 20);
         arial_50 = new Font("Arial", Font.BOLD, 40);
-        
 
         JPanel top = new JPanel();
 
@@ -74,7 +71,6 @@ public class gamemenu extends loginphoto implements ActionListener {
         
         add(top);
 
-
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         add(Box.createVerticalGlue());
 
@@ -87,7 +83,6 @@ public class gamemenu extends loginphoto implements ActionListener {
         single.setAlignmentX(Component.CENTER_ALIGNMENT);
         single.addActionListener(this);
         add(single);
-
 
         add(Box.createRigidArea(new Dimension(0, 20)));
 
@@ -128,12 +123,9 @@ public class gamemenu extends loginphoto implements ActionListener {
         add(Box.createVerticalGlue());
 
     }
-
     @Override
-    public void actionPerformed(ActionEvent e) {
-
-        
-        
+    public void actionPerformed(ActionEvent e) 
+    {
         if (e.getSource() == single )
         {
             gamehandler gh = new gamehandler(cardLayout,cardPanel,gc);

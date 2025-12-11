@@ -7,15 +7,12 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Component;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
 import background.loginphoto;
-
 
 public class loginornew extends loginphoto implements ActionListener {
 
@@ -30,8 +27,6 @@ public class loginornew extends loginphoto implements ActionListener {
 
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
-        
-        
  
         // Fixed font: Use BOLD (CENTER_BASELINE isn't valid)
         arial_40 = new Font("Arial", Font.BOLD, 25);

@@ -113,8 +113,6 @@ public class gamehandler extends gamepannel implements Runnable
         }
     }
 }
-    
-
 
     protected void paintComponent(Graphics g)
     {
@@ -131,14 +129,12 @@ public class gamehandler extends gamepannel implements Runnable
             int screenY = op.entity_map_Y - p1.entity_map_Y + p1.centery;
             op.draw(g2, screenX, screenY);
         }
-
         // 3. Draw local player ON TOP
         p1.draw(g2);
 
         g2.dispose();
     }
     
-
     public void pause() {
         System.out.println("paused");
         pausemenu pause = new pausemenu(cardLayout, cardPanel, this);
@@ -160,8 +156,7 @@ public class gamehandler extends gamepannel implements Runnable
             int y = Integer.parseInt(parts[i + 4]);
             String dir = parts[i + 5];
 
-            if (id.equals(gc.id)) continue;
-
+            if (id.equals(gc.id)) continue;            
             // Get existing player or create new one
             OtherPlayer op = otherPlayers.get(id);
             if (op == null) {
@@ -173,7 +168,6 @@ public class gamehandler extends gamepannel implements Runnable
                 op.right1 = p1.right1; op.right2 = p1.right2;
                 op.idle1 = p1.idle1; op.idle2 = p1.idle2;
             }
-
             op.entity_map_X = x;
             op.entity_map_Y = y;
             op.direction = dir;
@@ -181,7 +175,6 @@ public class gamehandler extends gamepannel implements Runnable
 
             newPlayers.put(id, op);
             }
-
             // Replace old list (removes disconnected players)
             otherPlayers.clear();
             otherPlayers.putAll(newPlayers);

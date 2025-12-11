@@ -7,8 +7,6 @@ import javax.swing.JPanel;
 
 
 public class frame{
- 
-
     public static void main(String[] args) {
 
         JFrame f = new JFrame("Doungen quest");
@@ -30,7 +28,5 @@ public class frame{
         f.setVisible(true);
         f.setLayout(null);
         f.setLocationRelativeTo(null);
-
     }
-    
 }
