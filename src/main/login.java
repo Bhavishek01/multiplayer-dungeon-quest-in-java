@@ -107,7 +107,7 @@ public class login extends loginphoto implements ActionListener {
 
             try 
             {
-                Thread.sleep(100);  // Pause for 1000 ms = 1 second
+                Thread.sleep(200);  // Pause for 1000 ms = 1 second
             } catch (InterruptedException ae) {
                 ae.printStackTrace();
             }

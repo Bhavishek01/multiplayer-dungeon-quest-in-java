@@ -5,9 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.swing.JPanel;
-
 import background.backgroundmanager;
 import gameobj.OtherPlayer;
 import gameobj.player;

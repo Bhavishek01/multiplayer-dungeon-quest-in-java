@@ -14,6 +14,7 @@ class ClientHandler implements Runnable {
     private String playerName = null;
     private int x = 96, y = 96;
     private String direction = "down";
+    private boolean GameEnter = false;
 
     public static final List<ClientHandler> allClients = Collections.synchronizedList(new ArrayList<>());
 
@@ -32,9 +33,10 @@ class ClientHandler implements Runnable {
             while ((message = in.readLine()) != null) {
              System.out.println(message);
                 if (playerId == null) {
-                   
                     handleLogin(message);
-                } else {
+                } 
+                else 
+                {
                     handleGameMessage(message);
                 }
             }
@@ -101,8 +103,10 @@ class ClientHandler implements Runnable {
 
     private void handleGameMessage(String msg)
     {
-        
         String[] parts = msg.split("\\|");
+        
+        if(GameEnter==true) 
+            {
             try {
                     this.x = Integer.parseInt(parts[1]);
                     this.y = Integer.parseInt(parts[2]);
@@ -110,6 +114,15 @@ class ClientHandler implements Runnable {
                     broadcastWorld();  // Send updated world to everyone
                 } 
                 catch (Exception ignored) {}
+            }
+            else
+            {
+            if("ENTER_GAME".equals(parts[0]))
+        {
+            GameEnter = true;
+            return;
+        }
+            }
     }
 
     private void broadcastWorld() 

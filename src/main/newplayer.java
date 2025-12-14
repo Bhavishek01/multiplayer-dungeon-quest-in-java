@@ -139,7 +139,7 @@ public class newplayer extends loginphoto implements ActionListener
                     gc.send(pname); 
                     try 
                     {
-                        Thread.sleep(100);  // Pause for 1000 ms = .1 second
+                        Thread.sleep(200);  // Pause for 1000 ms = .1 second
                     } catch (InterruptedException ae) {
                     ae.printStackTrace();
                     }

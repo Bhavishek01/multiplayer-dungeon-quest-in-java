@@ -128,6 +128,7 @@ public class gamemenu extends loginphoto implements ActionListener {
     {
         if (e.getSource() == single )
         {
+            gc.send("ENTER_GAME");
             gamehandler gh = new gamehandler(cardLayout,cardPanel,gc);
             
             cardPanel.add(gh, "gamehandler");
