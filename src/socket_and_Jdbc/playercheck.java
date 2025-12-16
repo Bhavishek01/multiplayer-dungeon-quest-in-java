@@ -4,9 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class playercheck {
-    private Connection conn = DatabaseConnection.getConnection();
+    private static Connection conn = DatabaseConnection.getConnection();
     private boolean idexists = false;
     private boolean nameexists = false;
 
@@ -76,6 +78,24 @@ public class playercheck {
             return rs.getString("PlayerName"); 
         }}
     } return null;
+    }
+
+    public List<PlayerItem> getPlayerItems(String playerId) throws SQLException
+    {
+        List<PlayerItem> items = new ArrayList<>();
+        String query = "SELECT item, qty FROM inventory WHERE playerid = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, playerId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(new PlayerItem(
+                        rs.getString("item"),
+                        rs.getInt("qty")
+                    ));
+                }
+            }
+        }
+        return items;
     }
 
 }

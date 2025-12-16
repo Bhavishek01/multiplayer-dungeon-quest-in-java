@@ -7,7 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-import gameobj.player;
+import gameplayers.player;
 import main.gamepannel;
 
 public class backgroundmanager extends gamepannel {

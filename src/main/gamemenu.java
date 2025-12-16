@@ -140,7 +140,9 @@ public class gamemenu extends loginphoto implements ActionListener {
         }
         else if (e.getSource() == inventory ) {
             
-            // cardLayout.show(cardPanel, "inventory");
+            inventory inv = new inventory(cardLayout, cardPanel, gc);
+            cardPanel.add(inv, "inventory");
+            cardLayout.show(cardPanel, "inventory");
         }
         else if (e.getSource() == exit ) {
             

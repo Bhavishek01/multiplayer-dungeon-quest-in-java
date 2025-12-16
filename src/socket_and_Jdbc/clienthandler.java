@@ -2,7 +2,11 @@ package socket_and_Jdbc;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 class ClientHandler implements Runnable {
     private final Socket socket;
@@ -10,11 +14,12 @@ class ClientHandler implements Runnable {
     private BufferedReader in;
     public playercheck checker = new playercheck();
 
-    private String playerId = null;
+    public String playerId = null;
     private String playerName = null;
     private int x = 96, y = 96;
     private String direction = "down";
     private boolean GameEnter = false;
+    public List<PlayerItem> items = new ArrayList<>();
 
     public static final List<ClientHandler> allClients = Collections.synchronizedList(new ArrayList<>());
 
@@ -118,10 +123,24 @@ class ClientHandler implements Runnable {
             else
             {
             if("ENTER_GAME".equals(parts[0]))
-        {
-            GameEnter = true;
-            return;
-        }
+            {
+                GameEnter = true;
+                return;
+            }
+            }
+            if ("INVENTORY".equals(parts[0])) {
+                try {
+                    List<PlayerItem> items = checker.getPlayerItems(playerId);
+                    StringBuilder itemMsg = new StringBuilder("ITEMS");
+                    for (PlayerItem item : items) {
+                        itemMsg.append("|").append(item.name)
+                            .append("|").append(item.quantity);
+                    }
+                    out.println(itemMsg.toString());
+                } catch (SQLException e) {
+                    out.println("ERROR|Failed to fetch items");
+                    e.printStackTrace();
+                }
             }
     }
 
@@ -129,8 +148,8 @@ class ClientHandler implements Runnable {
     {
         StringBuilder world = new StringBuilder("WORLD");
         synchronized (allClients) {
-            for (ClientHandler client : allClients) {
-                if (client.playerId != null) {  // only logged-in players
+            for (ClientHandler client : allClients ) {
+                if (client.playerId != null && client.GameEnter) {  // only logged-in players
                     world.append("|")
                         .append(client.playerId).append("|")
                         .append(client.playerName).append("|")

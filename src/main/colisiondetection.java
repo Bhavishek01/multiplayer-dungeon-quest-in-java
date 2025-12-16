@@ -1,6 +1,6 @@
 package main;
 
-import gameobj.entity;
+import gameplayers.entity;
 
 public class colisiondetection extends gamepannel{
 

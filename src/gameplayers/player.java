@@ -1,4 +1,4 @@
-package gameobj;
+package gameplayers;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;

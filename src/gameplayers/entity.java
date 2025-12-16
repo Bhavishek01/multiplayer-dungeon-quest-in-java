@@ -1,4 +1,4 @@
-package gameobj;
+package gameplayers;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;

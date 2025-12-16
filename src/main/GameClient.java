@@ -2,8 +2,11 @@ package main;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 public class gameclient {
 
@@ -18,6 +21,8 @@ public class gameclient {
     public boolean connection = false;
     public Map<String, OtherPlayer> otherPlayers = new ConcurrentHashMap<>();
     public gamehandler gameHandler;
+    
+    public List<PlayerItem> Items = new ArrayList<>();
 
     public static class OtherPlayer 
     {
@@ -72,6 +77,17 @@ public class gameclient {
         if (parts.length == 0) return;
 
         switch (parts[0]) {
+
+            case "ITEMS":
+                Items.clear();
+                for (int i = 1; i < parts.length; i += 2) {
+                    if (i + 2 >= parts.length) break;
+                    String name = parts[i];
+                    int qty = Integer.parseInt(parts[i + 1]);
+                    Items.add(new PlayerItem(name, qty));
+                }
+                break;
+
             case "WORLD":
                     if (gameHandler != null) 
                         {
@@ -112,6 +128,11 @@ public class gameclient {
                 break;
         }
     }
+
+    public void requestInventory() {
+        send("INVENTORY");
+    }
+
     // Send any message to server
     public void send(String message) {
         if (out != null) {

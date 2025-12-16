@@ -1,4 +1,4 @@
-package gameobj;
+package gameplayers;
 
 public class npc {
     

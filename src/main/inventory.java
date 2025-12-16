@@ -1,146 +1,126 @@
 package main;
 
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import background.loginphoto;
-import socket_and_Jdbc.DatabaseConnection;
 
-public class inventory extends loginphoto 
-{
+public class inventory extends loginphoto implements ActionListener {
+    private Font arial_40,arial_50;
+    private JButton[] button;  //,loginmenu;
+    public CardLayout cardLayout;
+    public JPanel cardPanel;
+    JLabel name,inventory,id;
+    gameclient gc;
+    public List<PlayerItem> items = new ArrayList<>();
 
-    private CardLayout cardLayout;
-    private JPanel cardPanel;
-    private String playerId;
-    private Font arial_40 = new Font("Arial", Font.BOLD, 25);
-    private Font arial_30 = new Font("Arial", Font.BOLD, 20);
-    private JPanel listPanel;
-    private JPanel detailsPanel;
-
-    public inventory(CardLayout cardLayout, JPanel cardPanel, String playerId) 
-    {
+    public inventory(CardLayout cardLayout, JPanel cardPanel,gameclient gc) {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
-        this.playerId = playerId;
+        this.gc = gc;
+        this.items = gc.Items;
+
+        setLayout(new BorderLayout());
+
+        arial_40 = new Font("Arial", Font.BOLD, 25);
+        arial_50 = new Font("Arial", Font.BOLD, 40);
+
+        JPanel top = new JPanel();
+
+        top.setOpaque(false);
+        top.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        top.setLayout(new BoxLayout(top, BoxLayout.X_AXIS));
+
+        name = new JLabel();
+        name.setText("Player Name: " + gc.name);
+        name.setFont(arial_40);
+        name.setForeground(Color.WHITE);
+        // name.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        // name.setAlignmentY(Component.TOP_ALIGNMENT);
+        top.add(name,BorderLayout.WEST);
+        top.add(Box.createHorizontalGlue());
+
+        inventory = new JLabel("inventory");
+        inventory.setFont(arial_50);
+        inventory.setForeground(Color.WHITE); 
+        inventory.setHorizontalAlignment(SwingConstants.CENTER);
+        // promptLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // promptLabel.setAlignmentY(Component.TOP_ALIGNMENT);
+        top.add(inventory,BorderLayout.CENTER);
+        top.add(Box.createHorizontalGlue());
+
+        button[0] = new JButton("back");
+        button[0].setFont(arial_40);
+        button[0].setBorderPainted(true);
+        button[0].setBackground(Color.BLACK);
+        button[0].setForeground(Color.WHITE);
+        button[0].addActionListener(this);
+        top.add(button[0]);
         
-        setLayout(new CardLayout());
-        listPanel = new JPanel();
-        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
-        listPanel.setOpaque(false); // For background visibility
-        detailsPanel = new JPanel();
-        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
-        detailsPanel.setOpaque(false);
-        add(listPanel, "list");
-        add(detailsPanel, "details");
-        fetchAndDisplayItems();
-        ((CardLayout) getLayout()).show(this, "list");
+        add(top);
+
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        add(Box.createVerticalGlue());
+
+        if(gc.Items != null)
+        {
+            for(PlayerItem item : items)
+            {
+                if(item.name == "gun")
+                {}
+                button[i] = new JButton()
+                button[i] = new JButton("Inventory");
+                button[i].setFont(arial_40);
+                button[i].setBorderPainted(true);
+                button[i].setBackground(Color.BLACK);
+                button[i].setForeground(Color.WHITE);
+                button[i].setOpaque(false);
+                button[i].setAlignmentX(Component.CENTER_ALIGNMENT);
+                button[i].addActionListener(this);
+                add(button[i]);
+
+                add(Box.createRigidArea(new Dimension(0, 5)));
+            }
+        }
+
+        add(Box.createVerticalGlue());
+
     }
-private void fetchAndDisplayItems() {
-listPanel.removeAll();
-JLabel title = new JLabel("Your Inventory");
-title.setFont(arial_40);
-title.setForeground(Color.WHITE);
-title.setAlignmentX(Component.CENTER_ALIGNMENT);
-listPanel.add(title);
-listPanel.add(Box.createVerticalGlue());
-Connection conn = DatabaseConnection.getConnection();
-try {
-String query = "SELECT item_name, quantity, description FROM player_items WHERE playerid = ?";
-PreparedStatement pstmt = conn.prepareStatement(query);
-pstmt.setString(1, playerId);
-ResultSet rs = pstmt.executeQuery();
-boolean hasItems = false;
-while (rs.next()) {
-hasItems = true;
-String name = rs.getString("item_name");
-int qty = rs.getInt("quantity");
-String desc = rs.getString("description");
-JButton itemBtn = new JButton(name);
-itemBtn.setFont(arial_30);
-itemBtn.setBorderPainted(true);
-itemBtn.setBackground(Color.BLACK);
-itemBtn.setForeground(Color.WHITE);
-itemBtn.setOpaque(false);
-itemBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-itemBtn.addActionListener(new ActionListener() {
-@Override
-public void actionPerformed(ActionEvent e) {
-showDetails(name, qty, desc);
-}
-});
-listPanel.add(itemBtn);
-listPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-}
-if (!hasItems) {
-JLabel noItems = new JLabel("No items in inventory");
-noItems.setFont(arial_30);
-noItems.setForeground(Color.WHITE);
-noItems.setAlignmentX(Component.CENTER_ALIGNMENT);
-listPanel.add(noItems);
-}
-// Back to menu button
-JButton backToMenu = new JButton("Back to Menu");
-backToMenu.setFont(arial_30);
-backToMenu.setBorderPainted(true);
-backToMenu.setBackground(Color.BLACK);
-backToMenu.setForeground(Color.WHITE);
-backToMenu.setOpaque(false);
-backToMenu.setAlignmentX(Component.CENTER_ALIGNMENT);
-backToMenu.addActionListener(e -> cardLayout.show(cardPanel, "gamemenu"));
-listPanel.add(backToMenu);
-} catch (SQLException e) {
-e.printStackTrace();
-JLabel errorLabel = new JLabel("Error fetching items");
-errorLabel.setFont(arial_30);
-errorLabel.setForeground(Color.RED);
-errorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-listPanel.add(errorLabel);
-}
-listPanel.add(Box.createVerticalGlue());
-listPanel.revalidate();
-listPanel.repaint();
-}
-private void showDetails(String name, int qty, String desc) {
-detailsPanel.removeAll();
-JLabel itemName = new JLabel("Item: " + name);
-itemName.setFont(arial_40);
-itemName.setForeground(Color.WHITE);
-itemName.setAlignmentX(Component.CENTER_ALIGNMENT);
-detailsPanel.add(itemName);
-detailsPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-JLabel quantity = new JLabel("Quantity: " + qty);
-quantity.setFont(arial_30);
-quantity.setForeground(Color.WHITE);
-quantity.setAlignmentX(Component.CENTER_ALIGNMENT);
-detailsPanel.add(quantity);
-detailsPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-JTextArea description = new JTextArea(desc);
-description.setFont(arial_30);
-description.setForeground(Color.WHITE);
-description.setBackground(new Color(0, 0, 0, 0)); // Transparent
-description.setWrapStyleWord(true);
-description.setLineWrap(true);
-description.setEditable(false);
-description.setAlignmentX(Component.CENTER_ALIGNMENT);
-detailsPanel.add(description);
-detailsPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-JButton backBtn = new JButton("Back to Inventory");
-backBtn.setFont(arial_30);
-backBtn.setBorderPainted(true);
-backBtn.setBackground(Color.BLACK);
-backBtn.setForeground(Color.WHITE);
-backBtn.setOpaque(false);
-backBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-backBtn.addActionListener(e -> ((CardLayout) getLayout()).show(inventory.this, "list"));
-detailsPanel.add(backBtn);
-detailsPanel.revalidate();
-detailsPanel.repaint();
-((CardLayout) getLayout()).show(this, "details");
-}
+    @Override
+    public void actionPerformed(ActionEvent e) 
+    {
+        if (e.getSource() == button[0])
+        {
+            gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gc);
+            cardPanel.add(gamemenu, "gamemenu");
+            cardLayout.show(cardPanel, "gamemenu"); 
+        }
+        else if (e.getSource() == inventory ) {
+            
+            inventory inv = new inventory(cardLayout, cardPanel, gc);
+            cardPanel.add(inv, "inventory");
+            cardLayout.show(cardPanel, "inventory");
+        }
+
+    //     else if (e.getSource() == loginmenu ) {
+            
+    //         cardLayout.show(cardPanel, "loginornew"); // Start with loginornew panel
+    //     }
+    }
 }

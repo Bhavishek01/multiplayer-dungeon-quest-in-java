@@ -1,0 +1,17 @@
+package items;
+
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+public class bow extends itemsdetail {
+
+    public bow() throws IOException
+    {
+        name = "bow";
+        image = ImageIO.read(new File("resource/object/bow.png"));
+        about = "A type of weapon, that uses arrow to attack";
+    }
+    
+}

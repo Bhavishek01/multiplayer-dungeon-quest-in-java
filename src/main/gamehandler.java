@@ -7,8 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JPanel;
 import background.backgroundmanager;
-import gameobj.OtherPlayer;
-import gameobj.player;
+import gameplayers.OtherPlayer;
+import gameplayers.player;
+
 
 public class gamehandler extends gamepannel implements Runnable
 {
