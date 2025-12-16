@@ -6,34 +6,40 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import background.loginphoto;
+import items.*;
 
 public class inventory extends loginphoto implements ActionListener {
     private Font arial_40,arial_50;
-    private JButton[] button;  //,loginmenu;
+    private JButton[] button; 
+    private JButton back; 
     public CardLayout cardLayout;
     public JPanel cardPanel;
-    JLabel name,inventory,id;
+    JLabel name,inventory;
     gameclient gc;
+
     public List<PlayerItem> items = new ArrayList<>();
 
     public inventory(CardLayout cardLayout, JPanel cardPanel,gameclient gc) {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
         this.gc = gc;
+
         this.items = gc.Items;
 
         setLayout(new BorderLayout());
@@ -65,37 +71,42 @@ public class inventory extends loginphoto implements ActionListener {
         top.add(inventory,BorderLayout.CENTER);
         top.add(Box.createHorizontalGlue());
 
-        button[0] = new JButton("back");
-        button[0].setFont(arial_40);
-        button[0].setBorderPainted(true);
-        button[0].setBackground(Color.BLACK);
-        button[0].setForeground(Color.WHITE);
-        button[0].addActionListener(this);
-        top.add(button[0]);
+        back = new JButton("back");
+        back.setFont(arial_40);
+        back.setBorderPainted(true);
+        back.setBackground(Color.BLACK);
+        back.setForeground(Color.WHITE);
+        back.setOpaque(false);
+        back.addActionListener(this);
+        top.add(back);
         
         add(top);
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         add(Box.createVerticalGlue());
 
-        if(gc.Items != null)
-        {
-            for(PlayerItem item : items)
+            for (int i = 0; i < items.size(); i++) {
+            PlayerItem item = items.get(i);
+            itemsdetail detail;
+            try 
             {
-                if(item.name == "gun")
-                {}
-                button[i] = new JButton()
-                button[i] = new JButton("Inventory");
-                button[i].setFont(arial_40);
+                detail = returnobj(item.name);
+
+                button[i] = new JButton();
+                button[i].setIcon(new ImageIcon(detail.image));
                 button[i].setBorderPainted(true);
                 button[i].setBackground(Color.BLACK);
                 button[i].setForeground(Color.WHITE);
                 button[i].setOpaque(false);
                 button[i].setAlignmentX(Component.CENTER_ALIGNMENT);
                 button[i].addActionListener(this);
-                add(button[i]);
 
+                add(button[i]);
                 add(Box.createRigidArea(new Dimension(0, 5)));
+            }
+            catch (IOException e) 
+            {
+                e.printStackTrace();
             }
         }
 
@@ -105,22 +116,59 @@ public class inventory extends loginphoto implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) 
     {
-        if (e.getSource() == button[0])
+        if (e.getSource() == back)
         {
             gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gc);
             cardPanel.add(gamemenu, "gamemenu");
             cardLayout.show(cardPanel, "gamemenu"); 
         }
-        else if (e.getSource() == inventory ) {
+        else if (e.getSource() == button) {
             
             inventory inv = new inventory(cardLayout, cardPanel, gc);
             cardPanel.add(inv, "inventory");
             cardLayout.show(cardPanel, "inventory");
         }
+    }
 
-    //     else if (e.getSource() == loginmenu ) {
-            
-    //         cardLayout.show(cardPanel, "loginornew"); // Start with loginornew panel
-    //     }
+    public itemsdetail returnobj(String a) throws IOException
+    {
+        switch (a) 
+        {
+            case "arrow":
+                arrow arrow = new arrow();
+                return arrow;
+
+            case "bow":
+                bow bow= new bow();
+                return bow;
+
+            case "bullet":
+                bullet bullet = new bullet();
+                return bullet;
+
+            case "gold_bullet":
+                gold_bullet gold_bullet = new gold_bullet();
+                return gold_bullet;
+
+            case "golden_gun":
+                golden_gun golden_gun = new golden_gun();
+                return golden_gun;
+
+            case "shoe":
+                shoe shoe = new shoe();
+                return shoe;
+
+            case "silver_gun":
+                silver_gun silver_gun= new silver_gun();
+                return silver_gun;
+
+            case "sword":
+                sword sword = new sword();
+                return sword;
+        
+            default:
+                return null;
+        }
+        
     }
 }

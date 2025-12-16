@@ -9,7 +9,7 @@ public class shoe extends itemsdetail{
     public shoe() throws IOException{
 
     name = "shoe";
-    image = ImageIO.read(new File("resource/object/fast_shoe.png"));
+    image = ImageIO.read(new File("resource/items/fast_shoe.png"));
     about = "A shoe that increases your speed for 1 minute";
     }
 }

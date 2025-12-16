@@ -10,7 +10,7 @@ public class gold_bullet extends itemsdetail {
     public gold_bullet() throws IOException
     {
         name = "gold_bullet";
-        image = ImageIO.read(new File("resource/object/gold_bullet.png"));
+        image = ImageIO.read(new File("resource/items/gold_bullet.png"));
         about = "A special type of bullet that travels more distance and has more speed";
         speed = 7;
         

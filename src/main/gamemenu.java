@@ -139,6 +139,8 @@ public class gamemenu extends loginphoto implements ActionListener {
             gh.startgame();
         }
         else if (e.getSource() == inventory ) {
+
+            gc.send("INVENTORY");
             
             inventory inv = new inventory(cardLayout, cardPanel, gc);
             cardPanel.add(inv, "inventory");

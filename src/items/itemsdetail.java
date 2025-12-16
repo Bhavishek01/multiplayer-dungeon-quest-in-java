@@ -3,11 +3,11 @@ package items;
 import java.awt.image.BufferedImage;
 
 public class itemsdetail {
-
-    public BufferedImage image;
+    
     public String name;
-    public int x,y;
+    public BufferedImage image;
+    public int x= 96,y =96;
     public boolean collision = true;
-    String about;
-    int speed = 0;
+    public String about;
+    public int speed = 0;
 }

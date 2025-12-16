@@ -9,7 +9,7 @@ public class sword extends itemsdetail {
     public sword() throws IOException
     {
         name = "sword";
-        image = ImageIO.read(new File("resource/object/sword.png"));
+        image = ImageIO.read(new File("resource/items/sword.png"));
 
     }
     

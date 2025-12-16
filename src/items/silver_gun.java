@@ -10,7 +10,7 @@ public class silver_gun extends itemsdetail {
     public silver_gun() throws IOException
     {
         name = "silver_gun";
-        image = ImageIO.read(new File("resource/object/silver_gun.png"));
+        image = ImageIO.read(new File("resource/items/silver_gun.png"));
         about = "A type of weapon, that uses bullet to attack";
     }
     
