@@ -1,0 +1,32 @@
+public void updateWorld(String data) {
+    if (!data.startsWith("WORLD|")) return;
+    String[] parts = data.substring(6).split("\\|");
+    HashMap<String, OtherPlayer> temp = new HashMap<>();
+
+    for (int i = 0; i < parts.length; i += 5) {
+        if (i + 4 >= parts.length) break;
+        String id = parts[i];
+        String name = parts[i+1];
+        int x = Integer.parseInt(parts[i+2]);
+        int y = Integer.parseInt(parts[i+3]);
+        String dir = parts[i+4];
+
+        if (id.equals(gc.id)) continue; // skip self
+
+        OtherPlayer op = temp.get(id);
+        if (op == null) {
+            op = new OtherPlayer(name);
+            op.up1 = p1.up1; op.up2 = p1.up2;
+                op.down1 = p1.down1; op.down2 = p1.down2;
+                op.left1 = p1.left1; op.left2 = p1.left2;
+                op.right1 = p1.right1; op.right2 = p1.right2;
+                op.idle1 = p1.idle1; op.idle2 = p1.idle2;
+        }
+        op.entity_map_X = x;
+        op.entity_map_Y = y;
+        op.direction = dir;
+        op.count++;
+        temp.put(id, op);
+    }
+    otherPlayers = temp;
+}

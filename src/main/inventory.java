@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
@@ -40,8 +42,15 @@ public class inventory extends loginphoto implements ActionListener {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
         this.gc = gc;
-
         this.items = gc.Items;
+
+        addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_Q) {
+                    openmenu();
+                }
+            }
+        });
 
         setLayout(new BorderLayout());
 
@@ -131,9 +140,7 @@ public class inventory extends loginphoto implements ActionListener {
     {
         if (e.getSource() == back)
         {
-            gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gc);
-            cardPanel.add(gamemenu, "gamemenu");
-            cardLayout.show(cardPanel, "gamemenu"); 
+            openmenu();
         }
         for (JButton button : buttons) {
             if (e.getSource() == button) {
@@ -200,5 +207,14 @@ public class inventory extends loginphoto implements ActionListener {
                 return null;
         }
         
+    }
+
+    public void openmenu()
+    {
+        System.out.println("back to menu");
+        gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gc);
+        cardPanel.add(gamemenu, "gamemenu");
+        cardLayout.show(cardPanel, "gamemenu"); 
+
     }
 }

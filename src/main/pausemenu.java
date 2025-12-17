@@ -41,7 +41,7 @@ public class pausemenu extends pausebackground implements ActionListener {
                     resume();
                 }
             }
-        }); 
+        });
 
         
         arial_40 = new Font("Arial", Font.BOLD, 25);

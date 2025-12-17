@@ -23,6 +23,8 @@ public class gameclient {
     public gamehandler gameHandler;
     
     public List<PlayerItem> Items = new ArrayList<>();
+    public List<chatter> chat = new ArrayList<>();
+    
 
     public static class OtherPlayer 
     {
@@ -87,6 +89,16 @@ public class gameclient {
                     Items.add(new PlayerItem(name, qty));
                 }
                 break;
+
+            case "SEND":
+                String senderName = parts[1];
+                StringBuilder msg = new StringBuilder();
+                for (int i = 2; i < parts.length; i++) msg.append(parts[i]).append(" ");
+                if (gameHandler != null && gameHandler.chat != null) {
+                    gameHandler.chat.addMessage(senderName, msg.toString().trim());
+                }
+                break;
+
 
             case "WORLD":
                     if (gameHandler != null) 

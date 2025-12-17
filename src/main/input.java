@@ -5,7 +5,8 @@ import java.awt.event.KeyListener;
 
 public class input implements KeyListener
 {
-    public boolean up,down,left,right,attack,resume,enter,pause,item;
+    public boolean up,down,left,right,attack,resume,enter,pause,inventory_open,chat;
+    public boolean pressed;
 
     @Override
     public void keyTyped(KeyEvent e) {}
@@ -14,13 +15,18 @@ public class input implements KeyListener
     public void keyPressed(KeyEvent e) 
     {
         int get = e.getKeyCode();
+        
+
+        if((get == KeyEvent.VK_C)){
+            chat = true;
+        }
+
+        if((get == KeyEvent.VK_E)){
+            inventory_open = true; // rename your existing 'item' if needed
+        }   
 
         if((get == KeyEvent.VK_P) ){
             pause = true;
-        }
-
-        if((get == KeyEvent.VK_E) ){
-            item = true;
         }
 
         if((get == KeyEvent.VK_Q) ){
@@ -49,6 +55,7 @@ public class input implements KeyListener
         if(get == KeyEvent.VK_SPACE){
             attack = true;
         }
+        pressed  = true;
 
     }
 
@@ -56,11 +63,15 @@ public class input implements KeyListener
     public void keyReleased(KeyEvent e) 
     {
         int get = e.getKeyCode();
+
         if((get == KeyEvent.VK_W) || (get == KeyEvent.VK_UP)){
             up = false;
         }
+        if((get == KeyEvent.VK_C)){
+            chat = false;
+        }
         if((get == KeyEvent.VK_E) ){
-            item = false;
+            inventory_open = false;
         }
         if((get == KeyEvent.VK_Q) ){
             resume = false;
@@ -83,5 +94,7 @@ public class input implements KeyListener
         if(get == KeyEvent.VK_SPACE){
             attack = false;
         }
+
+        pressed  = false;
     }   
 }

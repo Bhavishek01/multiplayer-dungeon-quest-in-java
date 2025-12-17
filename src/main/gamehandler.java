@@ -17,16 +17,23 @@ public class gamehandler extends gamepannel implements Runnable
     input key = new input();
     CardLayout cardLayout;
     JPanel cardPanel;
+    public chat chat;
+    public pausemenu pause;
 
     public gameclient gc;
     public Map<String, OtherPlayer> otherPlayers = new HashMap<>();
 
-    public volatile boolean ispaused = false;  // VOLATILE for thread safety
-    public volatile boolean paused = false;    // VOLATILE, removed isresumed
+    public volatile boolean ispaused = false;  // VOLATILE for thread safet
+    public volatile boolean ischatting = false;  // VOLATILE for thread safety
+    public volatile boolean isinventory_open = false;  // VOLATILE for thread safety
+
+     public volatile boolean paused = false;    // VOLATILE, removed isresumed
 
     public colisiondetection cd = new colisiondetection(this);
     public player p1 = new player(key,cd,this);
     public backgroundmanager bgm = new backgroundmanager(p1);
+
+
     
     Thread gameThread;
 
@@ -48,39 +55,6 @@ public class gamehandler extends gamepannel implements Runnable
         }
     }
 
-    public void updateWorld(String data) {
-    if (!data.startsWith("WORLD|")) return;
-    String[] parts = data.substring(6).split("\\|");
-    HashMap<String, OtherPlayer> temp = new HashMap<>();
-
-    for (int i = 0; i < parts.length; i += 5) {
-        if (i + 4 >= parts.length) break;
-        String id = parts[i];
-        String name = parts[i+1];
-        int x = Integer.parseInt(parts[i+2]);
-        int y = Integer.parseInt(parts[i+3]);
-        String dir = parts[i+4];
-
-        if (id.equals(gc.id)) continue; // skip self
-
-        OtherPlayer op = temp.get(id);
-        if (op == null) {
-            op = new OtherPlayer(name);
-            op.up1 = p1.up1; op.up2 = p1.up2;
-            op.down1 = p1.down1; op.down2 = p1.down2;
-            op.left1 = p1.left1; op.left2 = p1.left2;
-            op.right1 = p1.right1; op.right2 = p1.right2;
-            op.idle1 = p1.idle1;
-        }
-        op.entity_map_X = x;
-        op.entity_map_Y = y;
-        op.direction = dir;
-        op.count++;
-        temp.put(id, op);
-    }
-    otherPlayers = temp;
-}
-
     @Override
     public void run() {
         double interval = 1000000000 / fps;
@@ -91,8 +65,16 @@ public class gamehandler extends gamepannel implements Runnable
                 pause();
                 paused = true;
             }
+            else if (ischatting && !paused) {  
+               chat();
+               paused = true;
+            }
+            else if (isinventory_open && !paused) {  
+               inventory();
+               paused = true;
+            }
 
-            if (!ispaused) {
+            else if (!ispaused && !ischatting && !isinventory_open) {
                 p1.update();
                 repaint();
             }
@@ -136,10 +118,26 @@ public class gamehandler extends gamepannel implements Runnable
     
     public void pause() {
         System.out.println("paused");
-        pausemenu pause = new pausemenu(cardLayout, cardPanel, this);
+        pause = new pausemenu(cardLayout, cardPanel, this);
         cardPanel.add(pause, "pausemenu");
         cardLayout.show(cardPanel, "pausemenu");
         pause.requestFocusInWindow();
+    }
+
+    public void chat() {
+        System.out.println("Global chat");
+        chat = new chat(cardLayout, cardPanel, this);
+        cardPanel.add(chat, "chat");
+        cardLayout.show(cardPanel, "chat");
+        chat.requestFocusInWindow();
+    }
+
+    public void inventory() {
+        // System.out.println("Inventory");
+        // gameinventory gameinventory = new gameinventory(cardLayout, cardPanel, this);
+        // cardPanel.add(gameinventory, "gameinventory");
+        // cardLayout.show(cardPanel, "gameinventory");
+        // gameinventory.requestFocusInWindow();
     }
     
     public void updateOtherPlayers(String otherplayers) {

@@ -110,39 +110,57 @@ class ClientHandler implements Runnable {
     {
         String[] parts = msg.split("\\|");
         
-        if(GameEnter==true) 
+        if ("POS".equals(parts[0]))
+        {
+        try 
             {
-            try {
-                    this.x = Integer.parseInt(parts[1]);
-                    this.y = Integer.parseInt(parts[2]);
-                    this.direction = parts[3];
-                    broadcastWorld();  // Send updated world to everyone
-                } 
-                catch (Exception ignored) {}
-            }
-            else
+            this.x = Integer.parseInt(parts[1]);
+            this.y = Integer.parseInt(parts[2]);
+            this.direction = parts[3];
+            broadcastWorld();  // Send updated world to everyone
+            } 
+        catch (Exception ignored) {}
+        }
+
+        else if("ENTER_GAME".equals(parts[0]))
+        {
+            GameEnter = true;
+            return;
+        }
+        
+        else if("INVENTORY".equals(parts[0])) 
+        {
+        try {
+            List<PlayerItem> items = checker.getPlayerItems(playerId);
+            StringBuilder itemMsg = new StringBuilder("ITEMS");
+            for (PlayerItem item : items) 
             {
-            if("ENTER_GAME".equals(parts[0]))
+                itemMsg.append("|").append(item.name)
+                .append("|").append(item.quantity);
+            }
+            out.println(itemMsg.toString());
+            } 
+            catch (SQLException e) 
             {
-                GameEnter = true;
-                return;
+                out.println("ERROR|Failed to fetch items");
+                e.printStackTrace();
             }
-            }
-            if ("INVENTORY".equals(parts[0])) {
-                try {
-                    List<PlayerItem> items = checker.getPlayerItems(playerId);
-                    StringBuilder itemMsg = new StringBuilder("ITEMS");
-                    for (PlayerItem item : items) {
-                        itemMsg.append("|").append(item.name)
-                            .append("|").append(item.quantity);
+        }
+        
+        else if ("CHAT".equals(parts[0])) 
+        {
+                String broadcastMsg = "SEND|" + playerName + "|" + parts[1];
+                synchronized (allClients) {
+                    for (ClientHandler client : allClients) {
+                        try {
+                            client.out.println(broadcastMsg);
+                        } catch (Exception ignored) {}
                     }
-                    out.println(itemMsg.toString());
-                } catch (SQLException e) {
-                    out.println("ERROR|Failed to fetch items");
-                    e.printStackTrace();
                 }
+                System.out.println("Chat from " + playerName + ": " + parts[1]);
             }
     }
+        
 
     private void broadcastWorld() 
     {

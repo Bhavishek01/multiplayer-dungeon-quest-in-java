@@ -47,6 +47,8 @@ public class player extends entity {
         entitylife = 100;
         direction ="idle";
         gh.ispaused = false;
+        gh.ischatting = false;
+        gh.isinventory_open =false;
     }
     
     public void setimage(){
@@ -75,10 +77,7 @@ public class player extends entity {
     public void update()
     {
         checkplayer();  
-
-        
-
-                if (gh.gc != null && gh.gc.connection()) 
+                if (gh.gc != null && gh.gc.connection() && key.pressed) 
                     {
                         String posMsg = "POS|" + entity_map_X + "|" + entity_map_Y + "|" + direction;
                         gh.gc.send(posMsg);
@@ -142,14 +141,38 @@ public class player extends entity {
     public void checkplayer()
     {
         if (gh.ispaused) {
-        direction = "idle";  // NEW: Stop player movement when paused
-        return;  // NEW: Skip all input processing
+        direction = "idle"; 
+        return;
+        }
+
+        if (gh.ischatting) {
+        direction = "idle";
+        return;
+        }
+
+        if (gh.isinventory_open) {
+        direction = "idle";
+        return;
         }
 
         if (key.pause == true) {
             if (!gh.paused) {
                 gh.ispaused = true;
-                key.pause = false;  // NEW: Reset to prevent instant re-pause
+                key.pause = false;  
+            }
+        }
+
+        if (key.chat == true) {
+            if (!gh.paused) {
+                gh.ischatting = true;
+                key.pause = false; 
+            }
+        }
+
+        if (key.inventory_open == true) {
+            if (!gh.paused) {
+                gh.isinventory_open = true;
+                key.pause = false; 
             }
         }
 
@@ -157,10 +180,20 @@ public class player extends entity {
             if (gh.ispaused == true) {  // Simplified, removed isresumed
                 gh.ispaused = false;
                 key.resume = false;  // NEW: Reset
-            } else {
+            }
+            else if (gh.ischatting == true) {  // Simplified, removed isresumed
+                gh.ischatting = false;
+                key.resume = false;
+            }
+            else if (gh.isinventory_open == true) {  // Simplified, removed isresumed
+                gh.isinventory_open = false;
+                key.resume = false;
+            }
+             else {
                 direction = "idle";
             }
         }
+
         if((key.up == false || key.down == false || key.left == false || key.right == false || key.attack == false))
         {
             count ++;
