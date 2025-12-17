@@ -19,7 +19,6 @@ public class frame{
         
         loginornew loginOrNewPanel = new loginornew(cardLayout, cardPanel);
         cardPanel.add(loginOrNewPanel, "loginornew");
-
         f.add(cardPanel);
 
         cardLayout.show(cardPanel, "loginornew"); // Start with loginornew pane

@@ -83,13 +83,13 @@ public class playercheck {
     public List<PlayerItem> getPlayerItems(String playerId) throws SQLException
     {
         List<PlayerItem> items = new ArrayList<>();
-        String query = "SELECT item, qty FROM inventory WHERE playerid = ?";
+        String query = "SELECT item_id, qty FROM inventory WHERE playerid = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, playerId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     items.add(new PlayerItem(
-                        rs.getString("item"),
+                        rs.getInt("item_id"),
                         rs.getInt("qty")
                     ));
                 }

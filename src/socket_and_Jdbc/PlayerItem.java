@@ -1,10 +1,10 @@
 package socket_and_Jdbc;
 
     public class PlayerItem {
-        public String name;
+        public int name;
         public int quantity;
 
-        public PlayerItem(String name, int quantity) {
+        public PlayerItem(int name, int quantity) {
             this.name = name;
             this.quantity = quantity;
         }

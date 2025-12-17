@@ -73,6 +73,7 @@ public class gameclient {
 
     private void handleServer(String message) {
         String[] parts = message.split("\\|");
+        System.out.println(parts.length);
 
         if (parts.length == 0) return;
 
@@ -80,9 +81,8 @@ public class gameclient {
 
             case "ITEMS":
                 Items.clear();
-                for (int i = 1; i < parts.length; i += 2) {
-                    if (i + 2 >= parts.length) break;
-                    String name = parts[i];
+                for (int i = 1; i < parts.length; i +=2) {
+                    int name = Integer.parseInt(parts[i]);
                     int qty = Integer.parseInt(parts[i + 1]);
                     Items.add(new PlayerItem(name, qty));
                 }

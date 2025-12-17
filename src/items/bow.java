@@ -9,6 +9,7 @@ public class bow extends itemsdetail {
 
     public bow() throws IOException
     {
+        id = 2;
         name = "bow";
         image = ImageIO.read(new File("resource/items/bow.png"));
         about = "A type of weapon, that uses arrow to attack";

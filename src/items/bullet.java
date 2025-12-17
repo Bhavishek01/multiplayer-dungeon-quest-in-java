@@ -10,9 +10,11 @@ public class bullet extends itemsdetail {
     public bullet() throws IOException
     {
         name = "bullet";
-        image = ImageIO.read(new File("resource/items/bullet.png"));
-        about = "It is used with gun to attack";
-        speed = 6;
+        id = 3;
+        image = ImageIO.read(new File("resource/items/bullets.png"));
+        about = "A special type of bullet that travels more distance and has more speed";
+        speed = 7;
+        
     }
     
 }

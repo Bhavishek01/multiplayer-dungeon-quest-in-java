@@ -18,6 +18,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
@@ -26,7 +27,7 @@ import items.*;
 
 public class inventory extends loginphoto implements ActionListener {
     private Font arial_40,arial_50;
-    private JButton[] button; 
+    private List <JButton> buttons = new ArrayList<>(); 
     private JButton back; 
     public CardLayout cardLayout;
     public JPanel cardPanel;
@@ -80,37 +81,49 @@ public class inventory extends loginphoto implements ActionListener {
         back.addActionListener(this);
         top.add(back);
         
-        add(top);
+        // add(top);
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        add(Box.createVerticalGlue());
+        // add(Box.createVerticalGlue());
+        add(top, BorderLayout.NORTH);
 
-            for (int i = 0; i < items.size(); i++) {
-            PlayerItem item = items.get(i);
-            itemsdetail detail;
-            try 
-            {
-                detail = returnobj(item.name);
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setOpaque(false);
+        centerPanel.add(Box.createVerticalGlue());
 
-                button[i] = new JButton();
-                button[i].setIcon(new ImageIcon(detail.image));
-                button[i].setBorderPainted(true);
-                button[i].setBackground(Color.BLACK);
-                button[i].setForeground(Color.WHITE);
-                button[i].setOpaque(false);
-                button[i].setAlignmentX(Component.CENTER_ALIGNMENT);
-                button[i].addActionListener(this);
+            for (PlayerItem item : items) {
+                System.out.println(item.name);
+            if (item.quantity != 0) {
+                itemsdetail detail;
+                try {
+                    detail = returnobj(item.name);
+                    if (detail != null) {
+                        JButton button = new JButton();
+                        button.setIcon(new ImageIcon(detail.image));
+                        button.setBorderPainted(true);
+                        button.setBackground(Color.white);
+                        button.setForeground(Color.WHITE);
+                        button.setOpaque(true);
+                        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+                        button.addActionListener(this);
 
-                add(button[i]);
-                add(Box.createRigidArea(new Dimension(0, 5)));
-            }
-            catch (IOException e) 
-            {
-                e.printStackTrace();
-            }
+                        button.putClientProperty("item", item);
+                        button.putClientProperty("detail", detail);
+
+                        buttons.add(button);
+                        centerPanel.add(button);
+                        centerPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+                        
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
         }
 
-        add(Box.createVerticalGlue());
+        centerPanel.add(Box.createVerticalGlue());
+        add(centerPanel, BorderLayout.CENTER);
 
     }
     @Override
@@ -122,47 +135,64 @@ public class inventory extends loginphoto implements ActionListener {
             cardPanel.add(gamemenu, "gamemenu");
             cardLayout.show(cardPanel, "gamemenu"); 
         }
-        else if (e.getSource() == button) {
-            
-            inventory inv = new inventory(cardLayout, cardPanel, gc);
-            cardPanel.add(inv, "inventory");
-            cardLayout.show(cardPanel, "inventory");
+        for (JButton button : buttons) {
+            if (e.getSource() == button) {
+                PlayerItem item = (PlayerItem) button.getClientProperty("item");
+                itemsdetail detail = (itemsdetail) button.getClientProperty("detail");
+
+                if (item != null && detail != null) {
+                    String message = "<html>" +
+                            "<b>Item:</b> " + detail.name + "<br>" +
+                            "<b>Quantity:</b> " + item.quantity + "<br>" +
+                            "<b>About:</b> " + detail.about +
+                            "</html>";
+
+                    JOptionPane.showMessageDialog(
+                    this,
+                    message,
+                    "Item Details",
+                    JOptionPane.PLAIN_MESSAGE
+                );
+                }
+                break;
+            }
         }
     }
 
-    public itemsdetail returnobj(String a) throws IOException
+
+    public itemsdetail returnobj(int a) throws IOException
     {
         switch (a) 
         {
-            case "arrow":
+            case 1:
                 arrow arrow = new arrow();
                 return arrow;
 
-            case "bow":
+            case 2:
                 bow bow= new bow();
                 return bow;
 
-            case "bullet":
+            case 3:
                 bullet bullet = new bullet();
                 return bullet;
 
-            case "gold_bullet":
+            case 4:
                 gold_bullet gold_bullet = new gold_bullet();
                 return gold_bullet;
 
-            case "golden_gun":
+            case 5:
                 golden_gun golden_gun = new golden_gun();
                 return golden_gun;
 
-            case "shoe":
+            case 6:
                 shoe shoe = new shoe();
                 return shoe;
 
-            case "silver_gun":
+            case 7:
                 silver_gun silver_gun= new silver_gun();
                 return silver_gun;
 
-            case "sword":
+            case 8:
                 sword sword = new sword();
                 return sword;
         
