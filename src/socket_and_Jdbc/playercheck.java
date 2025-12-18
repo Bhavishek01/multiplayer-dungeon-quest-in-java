@@ -28,7 +28,7 @@ public class playercheck {
             return;
         }
 
-        String query = "SELECT playerid FROM players WHERE playerid = ?";
+        String query = "SELECT player_id FROM players WHERE player_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, id);
             System.out.println(id + "checking");
@@ -44,38 +44,49 @@ public class playercheck {
         return;
     }
 
-    String query = "SELECT playername FROM players WHERE playername = ?";
+    String query = "SELECT player_name FROM players WHERE player_name = ?";
     try (PreparedStatement pstmt = conn.prepareStatement(query)) {
         pstmt.setString(1, name);
         System.out.println(name + "checking");
         try (ResultSet rs = pstmt.executeQuery()) {
             nameexists = rs.next(); // true if a row with the name exists, false otherwise
         }
+        System.out.println("return form db check ");
     }
     }
 
     public void addplayer(String name, String id) throws SQLException {
-    String query = "INSERT INTO players (PlayerId, PlayerName) VALUES (?, ?)"; 
+    System.out.println("adding player");
+    String query = "INSERT INTO players (player_id, player_name) VALUES (?, ?)";
+
     try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-        pstmt.setString(1, id); // Set the player ID
-        pstmt.setString(2, name); // Set the player name
-        int rowsAffected = pstmt.executeUpdate(); // Execute the insert
+        pstmt.setString(1, id);
+        pstmt.setString(2, name);
+
+        System.out.println("Executing INSERT for player: " + id + " - " + name);
+        int rowsAffected = pstmt.executeUpdate();
+        System.out.println("Rows inserted: " + rowsAffected);
+
         if (rowsAffected > 0) {
-            System.out.println("Player " + id + " (" + name + ") added successfully!");
+            System.out.println("Player added successfully!");
         } else {
-            System.out.println("Failed to add player.");
+            System.out.println("Insert failed - no rows affected");
         }
+    } catch (SQLException e) {
+        System.err.println("SQL Error in addplayer:");
+        e.printStackTrace();
+        throw e;
     }
-    }
+}
 
     public String giveplayername(String id) throws SQLException {
 
-    String query = "SELECT playername FROM players WHERE playerid = ?";
+    String query = "SELECT player_name FROM players WHERE player_id = ?";
     try (PreparedStatement pstmt = conn.prepareStatement(query)) {
         pstmt.setString(1, id);
         try (ResultSet rs = pstmt.executeQuery()) {
             if(rs.next()){
-            return rs.getString("PlayerName"); 
+            return rs.getString("player_name"); 
         }}
     } return null;
     }
@@ -83,7 +94,7 @@ public class playercheck {
     public List<PlayerItem> getPlayerItems(String playerId) throws SQLException
     {
         List<PlayerItem> items = new ArrayList<>();
-        String query = "SELECT item_id, qty FROM inventory WHERE playerid = ?";
+        String query = "SELECT item_id, qty FROM inventory WHERE player_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, playerId);
             try (ResultSet rs = pstmt.executeQuery()) {

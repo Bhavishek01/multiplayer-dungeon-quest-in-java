@@ -85,6 +85,12 @@ class ClientHandler implements Runnable {
                 {
                     this.playerName = parts[1];
                     checker.checkplayername(playerName);
+                    try 
+                    {
+                        Thread.sleep(200);  // Pause for 1000 ms = 1 second
+                    } catch (InterruptedException ae) {
+                        ae.printStackTrace();
+                    }
                     if (checker.nameExists()) 
                     {
                         out.println("NAgain");
@@ -92,8 +98,10 @@ class ClientHandler implements Runnable {
                     }
                     else
                     {
+                        System.out.println("name doesnt exists");
                         Random rand = new Random();
                         playerId = playerName + rand.nextInt(255);
+                        System.out.println(playerId);
                         checker.addplayer(playerName, playerId);
                         out.println("REGISTER_SUCCESS|" + playerId + "|" + playerName);
                         System.out.println("New player registered: " + playerId + " (" + playerName + ")");

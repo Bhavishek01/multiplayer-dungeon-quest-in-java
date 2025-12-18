@@ -139,7 +139,7 @@ public class newplayer extends loginphoto implements ActionListener
                     gc.send(pname); 
                     try 
                     {
-                        Thread.sleep(200);  // Pause for 1000 ms = .1 second
+                        Thread.sleep(400);  // Pause for 1000 ms = .1 second
                     } catch (InterruptedException ae) {
                     ae.printStackTrace();
                     }
@@ -148,7 +148,7 @@ public class newplayer extends loginphoto implements ActionListener
                         {
                         playername.setText("");
                         er.setVisible(true);
-                        } 
+                        }
                         else 
                         {
                         submitButton.setVisible(false);
