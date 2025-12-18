@@ -121,8 +121,8 @@ public class pausemenu extends pausebackground implements ActionListener {
 
     public void resume() 
     {
+        gh.resumed = false;
         gh.ispaused = false;
-        gh.paused = false;  // Simplified, removed isresumed
         cardLayout.show(cardPanel, "gamehandler");
         gh.requestFocusInWindow();  // NEW: Ensure gamehandler gets focus for inputs
     }

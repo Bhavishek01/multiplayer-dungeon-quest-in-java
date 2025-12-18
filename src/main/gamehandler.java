@@ -17,17 +17,19 @@ public class gamehandler extends gamepannel implements Runnable
     input key = new input();
     CardLayout cardLayout;
     JPanel cardPanel;
-    public chat chat;
     public pausemenu pause;
+    public chat chat;
 
     public gameclient gc;
     public Map<String, OtherPlayer> otherPlayers = new HashMap<>();
 
     public volatile boolean ispaused = false;  // VOLATILE for thread safet
+    public volatile boolean resumed = false; 
+
     public volatile boolean ischatting = false;  // VOLATILE for thread safety
     public volatile boolean isinventory_open = false;  // VOLATILE for thread safety
 
-     public volatile boolean paused = false;    // VOLATILE, removed isresumed
+        // VOLATILE, removed isresumed
 
     public colisiondetection cd = new colisiondetection(this);
     public player p1 = new player(key,cd,this);
@@ -41,10 +43,14 @@ public class gamehandler extends gamepannel implements Runnable
         this.cardLayout = cardlayout;
         this.cardPanel = cardpanel;
         this.gc = gc;
+        chat = new chat(cardLayout, cardPanel, this);
+        cardPanel.add(chat, "chat");
         gc.setGameHandler(this);
         this.addKeyListener(key);
         this.setFocusable(true);  // NEW
         this.requestFocusInWindow();  // NEW
+
+        gc.send("ENTER_GAME");
     }
 
     public void startgame() {
@@ -60,19 +66,34 @@ public class gamehandler extends gamepannel implements Runnable
         double interval = 1000000000 / fps;
         double next = System.nanoTime() + interval;
 
-        while (gameThread != null) {
-            if (ispaused && !paused) {
-                pause();
-                paused = true;
+        while (gameThread != null) 
+        {
+            if (!resumed && ispaused) {
+                resumed = true;
+                System.out.println("paused");
+                pause = new pausemenu(cardLayout, cardPanel, this);
+                cardPanel.add(pause, "pausemenu");
+                cardLayout.show(cardPanel, "pausemenu");
+                pause.requestFocusInWindow();
             }
-            else if (ischatting && !paused) {  
-               chat();
-               paused = true;
+
+            else if (!resumed && ischatting)
+            {
+                resumed = true;
+                System.out.println("chat open");
+                cardLayout.show(cardPanel, "chat");
+                chat.requestFocusInWindow(); 
             }
-            else if (isinventory_open && !paused) {  
-               inventory();
-               paused = true;
-            }
+
+            // else if (!resumed && isinventory_open) 
+            // {
+            //     resumed = true;
+            //     System.out.println("chat open");
+            //     chat = new chat(cardLayout, cardPanel, this);
+            //     cardPanel.add(pause, "chat");
+            //     cardLayout.show(cardPanel, "chat");
+            //     chat.requestFocusInWindow(); 
+            // }
 
             else if (!ispaused && !ischatting && !isinventory_open) {
                 p1.update();
@@ -114,30 +135,6 @@ public class gamehandler extends gamepannel implements Runnable
         p1.draw(g2);
 
         g2.dispose();
-    }
-    
-    public void pause() {
-        System.out.println("paused");
-        pause = new pausemenu(cardLayout, cardPanel, this);
-        cardPanel.add(pause, "pausemenu");
-        cardLayout.show(cardPanel, "pausemenu");
-        pause.requestFocusInWindow();
-    }
-
-    public void chat() {
-        System.out.println("Global chat");
-        chat = new chat(cardLayout, cardPanel, this);
-        cardPanel.add(chat, "chat");
-        cardLayout.show(cardPanel, "chat");
-        chat.requestFocusInWindow();
-    }
-
-    public void inventory() {
-        // System.out.println("Inventory");
-        // gameinventory gameinventory = new gameinventory(cardLayout, cardPanel, this);
-        // cardPanel.add(gameinventory, "gameinventory");
-        // cardLayout.show(cardPanel, "gameinventory");
-        // gameinventory.requestFocusInWindow();
     }
     
     public void updateOtherPlayers(String otherplayers) {

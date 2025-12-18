@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+
 class ClientHandler implements Runnable {
     private final Socket socket;
     private PrintWriter out;
@@ -22,6 +23,9 @@ class ClientHandler implements Runnable {
     public List<PlayerItem> items = new ArrayList<>();
 
     public static final List<ClientHandler> allClients = Collections.synchronizedList(new ArrayList<>());
+
+    private static final int MAX_CHAT_HISTORY = 10;
+    private static final List<String> globalChatHistory = Collections.synchronizedList(new ArrayList<>());
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
@@ -125,6 +129,15 @@ class ClientHandler implements Runnable {
         else if("ENTER_GAME".equals(parts[0]))
         {
             GameEnter = true;
+            
+            synchronized (globalChatHistory) 
+            {
+                for (String histMsg : globalChatHistory) 
+                    {
+                    out.println("CHAT_HISTORY|" + histMsg);
+                }
+            }
+
             return;
         }
         
@@ -147,18 +160,29 @@ class ClientHandler implements Runnable {
             }
         }
         
-        else if ("CHAT".equals(parts[0])) 
+        else if ("CHAT".equals(parts[0]))
         {
-                String broadcastMsg = "SEND|" + playerName + "|" + parts[1];
-                synchronized (allClients) {
-                    for (ClientHandler client : allClients) {
-                        try {
-                            client.out.println(broadcastMsg);
-                        } catch (Exception ignored) {}
-                    }
+            String formattedMessage = playerName + ": " + parts[1];
+                
+            synchronized (globalChatHistory) 
+            {
+                globalChatHistory.add(formattedMessage);
+                if (globalChatHistory.size() > MAX_CHAT_HISTORY) 
+                {
+                    globalChatHistory.remove(0);
                 }
-                System.out.println("Chat from " + playerName + ": " + parts[1]);
             }
+
+            String broadcast = "SEND|" + formattedMessage;
+            synchronized (allClients) {
+                for (ClientHandler client : allClients) {
+                    try {
+                        client.out.println(broadcast);
+                    } catch (Exception ignored) {}
+                }
+            }
+            System.out.println("Chat: " + formattedMessage);
+        }
     }
         
 

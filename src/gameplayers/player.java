@@ -140,52 +140,43 @@ public class player extends entity {
 
     public void checkplayer()
     {
-        if (gh.ispaused) {
-        direction = "idle"; 
-        return;
-        }
-
-        if (gh.ischatting) {
-        direction = "idle";
-        return;
-        }
-
-        if (gh.isinventory_open) {
-        direction = "idle";
-        return;
-        }
-
         if (key.pause == true) {
-            if (!gh.paused) {
+            if (!gh.resumed) {
                 gh.ispaused = true;
-                key.pause = false;  
+                key.pause = false;
             }
+            direction = "idle";
         }
 
         if (key.chat == true) {
-            if (!gh.paused) {
+            if (!gh.resumed) {
                 gh.ischatting = true;
-                key.pause = false; 
+                key.chat = false;
             }
+            direction = "idle";
         }
 
         if (key.inventory_open == true) {
-            if (!gh.paused) {
+            if (!gh.resumed) {
                 gh.isinventory_open = true;
-                key.pause = false; 
+                key.inventory_open = false;
             }
+           direction = "idle";
         }
 
         if (key.resume == true) {
-            if (gh.ispaused == true) {  // Simplified, removed isresumed
+            if (key.pause) {  // Simplified, removed isresumed
+                gh.resumed = false;
                 gh.ispaused = false;
                 key.resume = false;  // NEW: Reset
             }
-            else if (gh.ischatting == true) {  // Simplified, removed isresumed
+            else if (key.chat) {  // Simplified, removed isresumed
+                gh.resumed = false;
                 gh.ischatting = false;
                 key.resume = false;
             }
-            else if (gh.isinventory_open == true) {  // Simplified, removed isresumed
+            else if (key.inventory_open) {  // Simplified, removed isresumed
+                gh.resumed = false;
                 gh.isinventory_open = false;
                 key.resume = false;
             }
@@ -196,6 +187,7 @@ public class player extends entity {
 
         if((key.up == false || key.down == false || key.left == false || key.right == false || key.attack == false))
         {
+            key.pressed = false;
             count ++;
             if(count >250)
             {
@@ -205,6 +197,8 @@ public class player extends entity {
 
         if(key.up == true || key.down == true || key.left == true || key.right == true || key.attack == true )
         {
+
+            key.pressed = true;
             if(key.up == true)
             {
                 direction ="up";

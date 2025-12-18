@@ -19,7 +19,8 @@ public class chat extends pausebackground {
     private JTextField chatInput;
     private List<String> chatHistory = new ArrayList<>();
 
-    public chat(CardLayout cl, JPanel cp, gamehandler gh) {
+    public chat(CardLayout cl, JPanel cp, gamehandler gh) 
+    {
         this.cardLayout = cl;
         this.cardPanel = cp;
         this.gh = gh;
@@ -49,9 +50,7 @@ public class chat extends pausebackground {
         chatDisplay.setForeground(Color.WHITE);
         chatDisplay.setFont(new Font("Arial", Font.PLAIN, 16));
         chatDisplay.setMargin(new Insets(10, 10, 10, 10));
-        JScrollPane scroll = new JScrollPane(chatDisplay);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-        add(scroll, BorderLayout.CENTER);
+        add(chatDisplay, BorderLayout.CENTER);
 
         // Input panel
         JPanel inputPanel = new JPanel(new BorderLayout(10, 10));
@@ -63,28 +62,54 @@ public class chat extends pausebackground {
         chatInput.addActionListener(e-> send());
         inputPanel.add(chatInput, BorderLayout.CENTER);
 
+        JButton backButton = new JButton("Back");
+        backButton.setFont(new Font("Arial", Font.BOLD, 18));
+        backButton.setBackground(new Color(50, 50, 50));
+        backButton.setForeground(Color.WHITE);
+        backButton.setFocusPainted(false);
+        backButton.addActionListener(e -> close());
+        inputPanel.add(backButton, BorderLayout.EAST);
+
         add(inputPanel, BorderLayout.SOUTH);
 
         // Key listener to close
         setFocusable(true);
     }
 
-    public void addMessage(String playerName, String message) {
-        chatHistory.add(playerName + ": " + message);
-        if (chatHistory.size() > 200) chatHistory.remove(0);
-
-        StringBuilder sb = new StringBuilder();
-        for (String msg : chatHistory) sb.append(msg).append("\n");
-        chatDisplay.setText(sb.toString());
-        chatDisplay.setCaretPosition(chatDisplay.getDocument().getLength());
+    public void addMessage( String message) 
+    {
+        System.out.println("added" + message);
+        SwingUtilities.invokeLater(() -> {
+            chatHistory.add(message);
+            refreshDisplay();
+        });
     }
 
-    public void close() {
-        System.out.println("close");
+    public void refreshDisplay() {
+        StringBuilder sb = new StringBuilder();
+        for (String msg : chatHistory) 
+        {
+            sb.append(msg).append("\n");
+        }
+        System.out.println("displaying " + sb);
+        chatDisplay.setText(sb.toString());
+        chatDisplay.revalidate();
+        chatDisplay.repaint();
+        scrollToBottom();
+    }
+
+    public void scrollToBottom() 
+    {
+    chatDisplay.setCaretPosition(chatDisplay.getDocument().getLength());
+    }
+
+    public void close() 
+    {
+        gh.resumed = false;
         gh.ischatting = false;
-        gh.paused = false;  // Simplified, removed isresumed
         cardLayout.show(cardPanel, "gamehandler");
-        gh.requestFocusInWindow();
+        gh.requestFocusInWindow();  
+        chatInput.setText("");
     }
 
     public void send()

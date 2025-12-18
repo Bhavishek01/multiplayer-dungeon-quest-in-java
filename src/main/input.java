@@ -5,7 +5,7 @@ import java.awt.event.KeyListener;
 
 public class input implements KeyListener
 {
-    public boolean up,down,left,right,attack,resume,enter,pause,inventory_open,chat;
+    public boolean up,down,left,right,attack,resume,pause,inventory_open,chat;
     public boolean pressed;
 
     @Override
@@ -33,10 +33,6 @@ public class input implements KeyListener
             resume = true;
         }
 
-        if((get == KeyEvent.VK_ENTER) ){
-            enter = true;
-        }
-
         if((get == KeyEvent.VK_W) || (get == KeyEvent.VK_UP)){
             up = true;   
         }
@@ -55,7 +51,6 @@ public class input implements KeyListener
         if(get == KeyEvent.VK_SPACE){
             attack = true;
         }
-        pressed  = true;
 
     }
 
@@ -79,9 +74,6 @@ public class input implements KeyListener
         if((get == KeyEvent.VK_P) ){
             pause = false;
         }
-        if((get == KeyEvent.VK_ENTER) ){
-            enter = false;
-        }
         if((get == KeyEvent.VK_S) || (get == KeyEvent.VK_DOWN)){
             down =false;
         }
@@ -94,7 +86,5 @@ public class input implements KeyListener
         if(get == KeyEvent.VK_SPACE){
             attack = false;
         }
-
-        pressed  = false;
     }   
 }

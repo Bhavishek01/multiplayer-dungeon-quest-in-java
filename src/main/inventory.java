@@ -44,10 +44,13 @@ public class inventory extends loginphoto implements ActionListener {
         this.gc = gc;
         this.items = gc.Items;
 
+        setFocusable(true);
+        requestFocusInWindow();
         addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_Q) {
                     openmenu();
+                    System.out.println("pressed");
                 }
             }
         });
@@ -166,7 +169,6 @@ public class inventory extends loginphoto implements ActionListener {
         }
     }
 
-
     public itemsdetail returnobj(int a) throws IOException
     {
         switch (a) 
@@ -215,6 +217,7 @@ public class inventory extends loginphoto implements ActionListener {
         gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gc);
         cardPanel.add(gamemenu, "gamemenu");
         cardLayout.show(cardPanel, "gamemenu"); 
+        
 
     }
 }

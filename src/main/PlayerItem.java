@@ -8,5 +8,4 @@ public class PlayerItem {
             this.name = name;
             this.quantity = quantity;
         }
-
     }
