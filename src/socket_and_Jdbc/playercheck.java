@@ -109,4 +109,17 @@ public class playercheck {
         return items;
     }
 
+    public void add_items(String pid, int item_id, int qty)
+    {
+        String ADD_ITEM_SQL ="INSERT INTO inventory (player_id, item_id, qty) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty)";
+
+        try (PreparedStatement ps = conn.prepareStatement(ADD_ITEM_SQL)) {
+            ps.setString(1, pid);
+            ps.setInt(2, item_id);
+            ps.setInt(3, qty);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

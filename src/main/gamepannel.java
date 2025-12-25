@@ -9,11 +9,11 @@ public class gamepannel extends JPanel
 {
 
     public int tiles = 48 ;
-    public int maxcol = 16;
-    public int maxrow = 12;
+    public int screencol = 16;
+    public int screenrow = 12;
 
-    public int height = tiles * maxrow;
-    public int base = tiles *maxcol;
+    public int height = tiles * screenrow;
+    public int base = tiles *screencol;
 
     public int maprow = 50;
     public int mapcol = 50;

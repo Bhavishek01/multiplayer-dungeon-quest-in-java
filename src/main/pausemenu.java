@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 import background.pausebackground;
 
 public class pausemenu extends pausebackground implements ActionListener {
-    private JButton resume, backToMenu, exit;
+    private JButton resume, backToMenu, exit, save;
     private Font arial_40;
     CardLayout cardLayout;
     JPanel cardPanel;
@@ -86,6 +86,18 @@ public class pausemenu extends pausebackground implements ActionListener {
 
         add(Box.createRigidArea(new Dimension(0, 20)));
 
+        save = new JButton("Save Game");
+        save.setFont(arial_40);
+        save.setBorderPainted(true);
+        save.setBackground(Color.BLACK);
+        save.setForeground(Color.WHITE);
+        save.setOpaque(false);
+        save.setAlignmentX(Component.CENTER_ALIGNMENT);
+        save.addActionListener(this);
+        add(save);
+
+        add(Box.createRigidArea(new Dimension(0, 20)));
+
         exit = new JButton("Exit");
         exit.setFont(arial_40);
         exit.setBorderPainted(true);
@@ -116,6 +128,10 @@ public class pausemenu extends pausebackground implements ActionListener {
         else if (e.getSource() == exit) 
         {
             System.exit(0);
+        }
+        else if (e.getSource() == save) 
+        {
+            gc.save_item();
         }
     }
 

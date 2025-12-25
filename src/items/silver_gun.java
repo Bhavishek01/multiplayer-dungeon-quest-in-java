@@ -9,6 +9,7 @@ public class silver_gun extends itemsdetail {
 
     public silver_gun() throws IOException
     {
+        System.out.println("silver_gun");
         name = "silver_gun";
         id = 7;
         image = ImageIO.read(new File("resource/items/silver_gun.png"));

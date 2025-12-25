@@ -20,13 +20,14 @@ public class loginornew extends loginphoto implements ActionListener {
     private JButton login, new_player,exit;
     private CardLayout cardLayout;
     private JPanel cardPanel;
-    gameclient gc = new gameclient();
+    gameclient gc;
     JLabel connectionlost;
 
     public loginornew(CardLayout cardLayout, JPanel cardPanel) {
 
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
+        gc = new gameclient();
  
         // Fixed font: Use BOLD (CENTER_BASELINE isn't valid)
         arial_40 = new Font("Arial", Font.BOLD, 25);

@@ -11,7 +11,8 @@ import background.pausebackground;
 import java.util.ArrayList;
 import java.util.List;
 
-public class chat extends pausebackground {
+public class chat extends pausebackground 
+{
     private CardLayout cardLayout;
     private JPanel cardPanel;
     private gamehandler gh;

@@ -9,6 +9,7 @@ public class bullet extends itemsdetail {
 
     public bullet() throws IOException
     {
+        System.out.println("bullet");
         name = "bullet";
         id = 3;
         image = ImageIO.read(new File("resource/items/bullets.png"));

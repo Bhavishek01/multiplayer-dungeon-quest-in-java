@@ -1,5 +1,6 @@
 package main;
 
-public class gameinventory {
-    
+public class gameinventory 
+{
+       
 }

@@ -5,7 +5,7 @@ import java.awt.event.KeyListener;
 
 public class input implements KeyListener
 {
-    public boolean up,down,left,right,attack,resume,pause,inventory_open,chat;
+    public boolean up,down,left,right,attack,resume,pause,inventory_open,chat,pick;
     public boolean pressed;
 
     @Override
@@ -19,6 +19,12 @@ public class input implements KeyListener
 
         if((get == KeyEvent.VK_C)){
             chat = true;
+            System.out.println("chat open");
+        }
+
+        if((get == KeyEvent.VK_ENTER)){
+            pick = true;
+            System.out.println("pick item");
         }
 
         if((get == KeyEvent.VK_E)){
@@ -61,6 +67,9 @@ public class input implements KeyListener
 
         if((get == KeyEvent.VK_W) || (get == KeyEvent.VK_UP)){
             up = false;
+        }
+        if((get == KeyEvent.VK_ENTER)){
+            pick = false;
         }
         if((get == KeyEvent.VK_C)){
             chat = false;

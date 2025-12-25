@@ -9,6 +9,7 @@ public class arrow extends itemsdetail {
 
     public arrow() throws IOException
     {
+        System.out.println("arrow");
         name = "arrow";
         id = 1;
         image = ImageIO.read(new File("resource/items/arrow.png"));

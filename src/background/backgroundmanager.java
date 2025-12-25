@@ -70,9 +70,12 @@ public class backgroundmanager extends gamepannel {
 
     public void draw(Graphics2D g2) 
     {
-        // Draw tiles within the 16X12 viewport
-        for (int row = 0; row < maprow; row++) {
-            for (int col = 0; col < mapcol; col++) {
+        int startCol = Math.max(0, (p1.entity_map_X - p1.centerx) / tiles);
+        int endCol = Math.min(mapcol, startCol + screencol + 1);
+        int startRow = Math.max(0, (p1.entity_map_Y - p1.centery) / tiles);
+        int endRow = Math.min(maprow, startRow + screenrow + 1);
+        for (int row = startRow; row < endRow; row++) {
+            for (int col = startCol; col < endCol; col++) {
                 
                     int tileType = Maprowcol[row][col];
 

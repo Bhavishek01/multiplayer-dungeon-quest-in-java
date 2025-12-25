@@ -98,7 +98,7 @@ public class gamemenu extends loginphoto implements ActionListener {
 
         add(Box.createRigidArea(new Dimension(0, 20)));
 
-        exit = new JButton("Exit");
+        exit = new JButton("Save & Exit");
         exit.setFont(arial_40);
         exit.setBorderPainted(true);
         exit.setBackground(Color.BLACK);
@@ -139,13 +139,15 @@ public class gamemenu extends loginphoto implements ActionListener {
         }
         else if (e.getSource() == inventory ) {
 
-            gc.send("INVENTORY");
+            // gc.send("INVENTORY");
             
             inventory inv = new inventory(cardLayout, cardPanel, gc);
             cardPanel.add(inv, "inventory");
             cardLayout.show(cardPanel, "inventory");
         }
-        else if (e.getSource() == exit ) {
+        else if (e.getSource() == exit ) 
+            {
+                gc.save_item();
             
             System.exit(0);    
         }

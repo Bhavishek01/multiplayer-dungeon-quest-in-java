@@ -18,6 +18,8 @@ public class server {
                 Socket clientSocket = serverSocket.accept(); 
 
                 ClientHandler handler = new ClientHandler(clientSocket);
+                 System.out.println("client added\n");
+
                 new Thread(handler).start();
             }
 

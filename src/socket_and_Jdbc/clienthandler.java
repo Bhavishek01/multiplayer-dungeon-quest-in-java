@@ -29,6 +29,8 @@ class ClientHandler implements Runnable {
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
+        System.out.println("client handler created");
+
     }
 
     @Override
@@ -74,6 +76,7 @@ class ClientHandler implements Runnable {
                             out.println("LOGIN_SUCCESS|" + playerId + "|" + playerName);
                             System.out.println("client added: " + playerId);
                             allClients.add(this);
+                            send_inventory();
                         } 
                         else 
                             {
@@ -106,6 +109,7 @@ class ClientHandler implements Runnable {
                         out.println("REGISTER_SUCCESS|" + playerId + "|" + playerName);
                         System.out.println("New player registered: " + playerId + " (" + playerName + ")");
                         allClients.add(this);
+                        send_inventory();
                     }
                 }
                 else 
@@ -145,27 +149,22 @@ class ClientHandler implements Runnable {
                     out.println("CHAT_HISTORY|" + histMsg);
                 }
             }
-
             return;
         }
         
-        else if("INVENTORY".equals(parts[0])) 
+        else if("ITEMS".equals(parts[0])) 
         {
-        try {
-            List<PlayerItem> items = checker.getPlayerItems(playerId);
-            StringBuilder itemMsg = new StringBuilder("ITEMS");
-            for (PlayerItem item : items) 
+            items.clear();
+            for (int i = 1; i < parts.length; i +=2) 
             {
-                itemMsg.append("|").append(item.name)
-                .append("|").append(item.quantity);
+                int name = Integer.parseInt(parts[i]);
+                int qty = Integer.parseInt(parts[i + 1]);
+                items.add(new PlayerItem(name, qty));
+                checker.add_items(playerId, name, qty);
             }
-            out.println(itemMsg.toString());
-            } 
-            catch (SQLException e) 
-            {
-                out.println("ERROR|Failed to fetch items");
-                e.printStackTrace();
-            }
+
+            
+            
         }
         
         else if ("CHAT".equals(parts[0]))
@@ -230,4 +229,23 @@ class ClientHandler implements Runnable {
         }
         try { socket.close(); } catch (Exception ignored) {}
     }
+
+   private void send_inventory() 
+        {
+        try {
+            List<PlayerItem> items = checker.getPlayerItems(playerId);
+            StringBuilder itemMsg = new StringBuilder("ITEMS");
+            for (PlayerItem item : items) 
+            {
+                itemMsg.append("|").append(item.name)
+                .append("|").append(item.quantity);
+            }
+            out.println(itemMsg.toString());
+            } 
+            catch (SQLException e) 
+            {
+                out.println("ERROR|Failed to fetch items");
+                e.printStackTrace();
+            }
+        }
 }

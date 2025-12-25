@@ -33,6 +33,8 @@ public class player extends entity {
 
         colisionarea.x = 15;
         colisionarea.y = 10;
+        colisionarea_default_x = colisionarea.x;
+        colisionarea_default_y = colisionarea.y;
         colisionarea.width = 18;
         colisionarea.height = 33;
         
@@ -223,9 +225,15 @@ public class player extends entity {
             }
 
             colision = false;
+            player_colision = false;
+            item_colision = false;
+            monster_colision = false;
+
             entityspeed = 3;
             cd.checkcolision(this);
-            if(!colision )
+            cd.item_collision(this, key);
+            cd.player_colision(this);
+            if(!colision)
             {
                 switch(direction)
                 {
@@ -243,8 +251,7 @@ public class player extends entity {
                             break;
                     case "attack":// attack animation
                     break;
-                }
-                    
+                }   
             }
 
             count ++;

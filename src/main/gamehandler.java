@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JPanel;
 import background.backgroundmanager;
+import environment.environment_manager;
 import gameplayers.OtherPlayer;
 import gameplayers.player;
+import items.itemsdetail;
 
 
 public class gamehandler extends gamepannel implements Runnable
@@ -29,13 +31,18 @@ public class gamehandler extends gamepannel implements Runnable
     public volatile boolean ischatting = false;  // VOLATILE for thread safety
     public volatile boolean isinventory_open = false;  // VOLATILE for thread safety
 
+    public volatile boolean light_on = true;  // VOLATILE for thread safety
+    public volatile boolean light_use = false;  // VOLATILE for thread safety
+    
+
         // VOLATILE, removed isresumed
 
     public colisiondetection cd = new colisiondetection(this);
     public player p1 = new player(key,cd,this);
     public backgroundmanager bgm = new backgroundmanager(p1);
-
-
+    public itemsdetail gameitems[] = new itemsdetail[10];
+    public itemspawn itemspawn = new itemspawn(this);
+    public environment_manager environmentManager = new environment_manager(this);
     
     Thread gameThread;
 
@@ -51,6 +58,7 @@ public class gamehandler extends gamepannel implements Runnable
         this.requestFocusInWindow();  // NEW
 
         gc.send("ENTER_GAME");
+        environmentManager.setup();
     }
 
     public void startgame() {
@@ -80,7 +88,7 @@ public class gamehandler extends gamepannel implements Runnable
             else if (!resumed && ischatting)
             {
                 resumed = true;
-                System.out.println("chat open");
+                
                 cardLayout.show(cardPanel, "chat");
                 chat.requestFocusInWindow(); 
             }
@@ -125,6 +133,13 @@ public class gamehandler extends gamepannel implements Runnable
         // 1. Draw background/tiles (world)
         bgm.draw(g2);
 
+        // draw items // for local
+        for(int i = 0; i<gameitems.length; i++)
+        {
+            if(gameitems[i] != null)
+            gameitems[i].draw(g2, this);
+        }
+
         // 2. Draw ALL other players (they appear behind you)
         for (OtherPlayer op : otherPlayers.values()) {
             int screenX = op.entity_map_X - p1.entity_map_X + p1.centerx;
@@ -133,6 +148,15 @@ public class gamehandler extends gamepannel implements Runnable
         }
         // 3. Draw local player ON TOP
         p1.draw(g2);
+
+        if(light_on && light_use)
+        {
+            environmentManager.draw(g2);
+        }
+        else if(light_on && !light_use)
+        {
+            environmentManager.draw1(g2);
+        }
 
         g2.dispose();
     }

@@ -51,7 +51,7 @@ public class gameclient {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Start listening thread
+            
             new Thread(() -> {
                 String msg;
                 try {
@@ -144,9 +144,7 @@ public class gameclient {
         }
     }
 
-    public void requestInventory() {
-        send("INVENTORY");
-    }
+
 
     // Send any message to server
     public void send(String message) {
@@ -165,5 +163,18 @@ public class gameclient {
     public void setGameHandler(gamehandler gh) 
     {
         this.gameHandler = gh;
+    }
+
+    public void save_item() 
+    {
+        StringBuilder itemMsg = new StringBuilder("ITEMS");
+            for (PlayerItem item : Items) 
+            {
+                itemMsg.append("|").append(item.name)
+                .append("|").append(item.quantity);
+
+                
+            }
+            out.println(itemMsg.toString());
     }
 }

@@ -9,6 +9,7 @@ public class gold_bullet extends itemsdetail {
 
     public gold_bullet() throws IOException
     {
+        System.out.println("gold_bullet");
         name = "gold_bullet";
         id = 4;
         image = ImageIO.read(new File("resource/items/gold_bullet.png"));
