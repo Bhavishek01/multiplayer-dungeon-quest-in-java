@@ -19,6 +19,9 @@ public class player extends entity {
     input key;
     colisiondetection cd;
     public gamehandler gh;
+    public boolean iswater = false;
+    public boolean island = true;
+    public boolean using_shoe = false;
 
     public player( input key,colisiondetection cd, gamehandler gh){
         this.key = key;
@@ -51,6 +54,7 @@ public class player extends entity {
         gh.ispaused = false;
         gh.ischatting = false;
         gh.isinventory_open =false;
+        entityspeed = 3;
     }
     
     public void setimage(){
@@ -158,10 +162,10 @@ public class player extends entity {
             direction = "idle";
         }
 
-        if (key.inventory_open == true) {
+        if (key.open_inventory == true) {
             if (!gh.resumed) {
                 gh.isinventory_open = true;
-                key.inventory_open = false;
+                key.open_inventory = false;
             }
            direction = "idle";
         }
@@ -177,7 +181,7 @@ public class player extends entity {
                 gh.ischatting = false;
                 key.resume = false;
             }
-            else if (key.inventory_open) {  // Simplified, removed isresumed
+            else if (key.open_inventory) {  // Simplified, removed isresumed
                 gh.resumed = false;
                 gh.isinventory_open = false;
                 key.resume = false;
@@ -187,7 +191,7 @@ public class player extends entity {
             }
         }
 
-        if((key.up == false || key.down == false || key.left == false || key.right == false || key.attack == false))
+        if((key.up == false || key.down == false || key.left == false || key.right == false))
         {
             key.pressed = false;
             count ++;
@@ -197,7 +201,7 @@ public class player extends entity {
             }
         }
 
-        if(key.up == true || key.down == true || key.left == true || key.right == true || key.attack == true )
+        if(key.up == true || key.down == true || key.left == true || key.right == true )
         {
 
             key.pressed = true;
@@ -217,24 +221,18 @@ public class player extends entity {
             {
                 direction ="right";
             }
-            else if(key.attack == true)
-            {
-                direction = "attack";
-                // attack animation 
-                // enemy ko life decrease if enemy sanga collide vaye
-            }
 
             colision = false;
             player_colision = false;
             item_colision = false;
             monster_colision = false;
 
-            entityspeed = 3;
             cd.checkcolision(this);
             cd.item_collision(this, key);
             cd.player_colision(this);
             if(!colision)
             {
+                entityspeed = set_speed();
                 switch(direction)
                 {
                     case "up":
@@ -265,4 +263,26 @@ public class player extends entity {
             }
         }
     }
+
+    public int set_speed() {
+        if(iswater && !using_shoe)
+        {
+            return  1;
+        }
+        else if(island && !using_shoe)
+        {
+            return  3;
+        }
+        else if(island && using_shoe)
+        {
+            return  5;
+        }
+        else if(iswater && using_shoe)
+        {
+            return  3;
+        }
+        return 3;
+    
+}
+
 }

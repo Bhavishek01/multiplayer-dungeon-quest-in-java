@@ -105,11 +105,11 @@ public class inventory extends loginphoto implements ActionListener {
         centerPanel.add(Box.createVerticalGlue());
 
             for (PlayerItem item : items) {
-                System.out.println(item.name);
+                System.out.println(item.id);
             if (item.quantity != 0) {
                 itemsdetail detail;
                 try {
-                    detail = returnobj(item.name);
+                    detail = returnobj(item.id);
                     if (detail != null) {
                         JButton button = new JButton();
                         button.setIcon(new ImageIcon(detail.image));
@@ -217,7 +217,5 @@ public class inventory extends loginphoto implements ActionListener {
         gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gc);
         cardPanel.add(gamemenu, "gamemenu");
         cardLayout.show(cardPanel, "gamemenu"); 
-        
-
     }
 }

@@ -21,6 +21,8 @@ public class gamehandler extends gamepannel implements Runnable
     JPanel cardPanel;
     public pausemenu pause;
     public chat chat;
+    public gameinventory gameinventory;
+    public equipped equipmentManager;
 
     public gameclient gc;
     public Map<String, OtherPlayer> otherPlayers = new HashMap<>();
@@ -40,17 +42,21 @@ public class gamehandler extends gamepannel implements Runnable
     public colisiondetection cd = new colisiondetection(this);
     public player p1 = new player(key,cd,this);
     public backgroundmanager bgm = new backgroundmanager(p1);
-    public itemsdetail gameitems[] = new itemsdetail[10];
+    public itemsdetail gameitems[] = new itemsdetail[9];
     public itemspawn itemspawn = new itemspawn(this);
     public environment_manager environmentManager = new environment_manager(this);
     
     Thread gameThread;
 
     public gamehandler(CardLayout cardlayout, JPanel cardpanel, gameclient gc) {
+        
         this.cardLayout = cardlayout;
         this.cardPanel = cardpanel;
         this.gc = gc;
         chat = new chat(cardLayout, cardPanel, this);
+        cardPanel.add(chat, "chat");
+        gameinventory = new gameinventory(cardLayout, cardPanel, this);
+        cardPanel.add(gameinventory, "gameinventory");
         cardPanel.add(chat, "chat");
         gc.setGameHandler(this);
         this.addKeyListener(key);
@@ -63,9 +69,11 @@ public class gamehandler extends gamepannel implements Runnable
 
     public void startgame() {
         if (gameThread == null) { // Only start if no thread exists
+            equipmentManager = new equipped( gc.equippedItems,this);
             System.out.println("playing state");
             gameThread = new Thread(this);
             gameThread.start();
+            equipmentManager.apply_effects();
         }
     }
 
@@ -93,15 +101,14 @@ public class gamehandler extends gamepannel implements Runnable
                 chat.requestFocusInWindow(); 
             }
 
-            // else if (!resumed && isinventory_open) 
-            // {
-            //     resumed = true;
-            //     System.out.println("chat open");
-            //     chat = new chat(cardLayout, cardPanel, this);
-            //     cardPanel.add(pause, "chat");
-            //     cardLayout.show(cardPanel, "chat");
-            //     chat.requestFocusInWindow(); 
-            // }
+            else if (!resumed && isinventory_open) 
+            {
+                resumed = true;
+                System.out.println("inventory open");
+                cardLayout.show(cardPanel, "gameinventory");
+                gameinventory.refreshInventory();
+                gameinventory.requestFocusInWindow(); 
+            }
 
             else if (!ispaused && !ischatting && !isinventory_open) {
                 p1.update();
@@ -149,13 +156,9 @@ public class gamehandler extends gamepannel implements Runnable
         // 3. Draw local player ON TOP
         p1.draw(g2);
 
-        if(light_on && light_use)
+        if(light_on && !light_use)
         {
             environmentManager.draw(g2);
-        }
-        else if(light_on && !light_use)
-        {
-            environmentManager.draw1(g2);
         }
 
         g2.dispose();

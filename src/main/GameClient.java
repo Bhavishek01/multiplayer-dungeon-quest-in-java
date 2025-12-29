@@ -18,6 +18,8 @@ public class gameclient {
     public String name;
     public String id;
 
+    public final int[] equippedItems = new int[3];
+
     public boolean connection = false;
     public Map<String, OtherPlayer> otherPlayers = new ConcurrentHashMap<>();
     public gamehandler gameHandler;
@@ -44,6 +46,7 @@ public class gameclient {
     }
 
     public gameclient() {
+        
         try {
             socket = new Socket("localhost", 5555);
             connection = true;
@@ -51,12 +54,13 @@ public class gameclient {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+            java.util.Arrays.fill(equippedItems, 0);
             
             new Thread(() -> {
                 String msg;
                 try {
                     while ((msg = in.readLine()) != null) {
-                        System.out.println(msg);
+                        // System.out.println(msg);
                         handleServer(msg);
                     }
                 } catch (IOException e) {
@@ -72,7 +76,6 @@ public class gameclient {
 
     private void handleServer(String message) {
         String[] parts = message.split("\\|");
-        System.out.println(parts.length);
 
         if (parts.length == 0) return;
 
@@ -170,7 +173,7 @@ public class gameclient {
         StringBuilder itemMsg = new StringBuilder("ITEMS");
             for (PlayerItem item : Items) 
             {
-                itemMsg.append("|").append(item.name)
+                itemMsg.append("|").append(item.id)
                 .append("|").append(item.quantity);
 
                 

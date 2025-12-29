@@ -5,7 +5,7 @@ import java.awt.event.KeyListener;
 
 public class input implements KeyListener
 {
-    public boolean up,down,left,right,attack,resume,pause,inventory_open,chat,pick;
+    public boolean up,down,left,right,resume,pause,open_inventory,chat,pick;
     public boolean pressed;
 
     @Override
@@ -22,13 +22,13 @@ public class input implements KeyListener
             System.out.println("chat open");
         }
 
-        if((get == KeyEvent.VK_ENTER)){
+        if((get == KeyEvent.VK_SPACE)){
             pick = true;
             System.out.println("pick item");
         }
 
         if((get == KeyEvent.VK_E)){
-            inventory_open = true; // rename your existing 'item' if needed
+            open_inventory = true; // rename your existing 'item' if needed
         }   
 
         if((get == KeyEvent.VK_P) ){
@@ -54,10 +54,6 @@ public class input implements KeyListener
             right =true;
         }
 
-        if(get == KeyEvent.VK_SPACE){
-            attack = true;
-        }
-
     }
 
     @Override
@@ -68,14 +64,11 @@ public class input implements KeyListener
         if((get == KeyEvent.VK_W) || (get == KeyEvent.VK_UP)){
             up = false;
         }
-        if((get == KeyEvent.VK_ENTER)){
-            pick = false;
-        }
         if((get == KeyEvent.VK_C)){
             chat = false;
         }
         if((get == KeyEvent.VK_E) ){
-            inventory_open = false;
+            open_inventory = false;
         }
         if((get == KeyEvent.VK_Q) ){
             resume = false;
@@ -93,7 +86,7 @@ public class input implements KeyListener
             right =false;
         }
         if(get == KeyEvent.VK_SPACE){
-            attack = false;
+            pick = false;
         }
     }   
 }

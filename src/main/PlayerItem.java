@@ -1,11 +1,11 @@
 package main;
 
 public class PlayerItem {
-        public int name = 0;
+        public int id = 0;
         public int quantity;
 
-        public PlayerItem(int name, int quantity) {
-            this.name = name;
+        public PlayerItem(int id, int quantity) {
+            this.id = id;
             this.quantity = quantity;
         }
     }

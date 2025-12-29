@@ -3,10 +3,6 @@ package environment;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
-import java.awt.Shape;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import main.gamehandler;
@@ -22,25 +18,9 @@ public class lighting
         image = new BufferedImage (gh.base, gh.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = (Graphics2D) image.getGraphics();
 
-        // Create a screen-sized rectangle area
-        Area screenArea = new Area (new Rectangle2D.Double (0,0,gh.base,gh.height));
-
         // Get the center x and y of the light circle
         int centerX = gh.p1.centerx;
         int centerY = gh.p1.centery;
-
-        // Get the top left x and y of the light circle
-        double x = centerX - (radius/2);
-        double y = centerY - (radius/2);
-
-        // Create a light circle shape
-        Shape circleShape = new Ellipse2D.Double (x, y, radius, radius) ;
-
-        // Create a light circle area
-        Area lightArea = new Area(circleShape);
-
-        // Subtract the light circle from the screen rectangle
-        screenArea.subtract (lightArea);
         
 
         Color[] color = new Color[35];
@@ -72,7 +52,7 @@ public class lighting
         color[22] = new Color(0, 0, 0, 0.955f);
         color[23] = new Color(0, 0, 0, 0.96f);
         color[24] = new Color(0, 0, 0, 0.965f);
-        color[25] = new Color(0, 0, 0, 0.97f);
+        color[25] = new Color(0, 0, 0, 0.970f);
         color[26] = new Color(0, 0, 0, 0.972f);
         color[27] = new Color(0, 0, 0, 0.975f);
         color[28] = new Color(0, 0, 0, 0.978f);
@@ -118,7 +98,7 @@ public class lighting
         fraction[31] = 0.984f;
         fraction[32] = 0.99f;
         fraction[33] = 0.995f;
-        fraction[34] = 1.00f;
+        fraction[34] = 0.999f;
 
         // Create a gradation paint settings for the light circle
         RadialGradientPaint gPaint = new RadialGradientPaint (centerX, centerY, (radius/2), fraction, color);
@@ -126,11 +106,8 @@ public class lighting
         // Set the gradient data on g2
         g2.setPaint(gPaint);
 
-        // Draw the light circlel
-        g2.fill(lightArea);
-
         // Draw the screen rectangle without the light circle area
-        g2.fill(screenArea);
+        g2.fillRect(0,0,gh.base,gh.height);
 
         g2.dispose();
     }

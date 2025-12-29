@@ -6,12 +6,11 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import background.pausebackground;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class chat extends pausebackground 
+public class chat extends JPanel 
 {
     private CardLayout cardLayout;
     private JPanel cardPanel;

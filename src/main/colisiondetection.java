@@ -15,7 +15,7 @@ public class colisiondetection extends gamepannel {
     }
 
     // New: Predictive check for proposed movement delta
-    public void checkcolision(entity entity) 
+    public void checkcolision(entity entity)
     {
         int entity_left_axis = entity.entity_map_X + entity.colisionarea.x;
         int entity_right_axis = entity_left_axis + entity.colisionarea.width;
@@ -59,8 +59,12 @@ public class colisiondetection extends gamepannel {
                     }
                     if (tileType == 3) 
                     {
-                        entity.entityspeed = 1;
-                        return;
+                        gh.p1.iswater = true;
+                        gh.p1.island = false;
+                    }
+                    else if(tileType == 2){
+                        gh.p1.iswater = false;
+                        gh.p1.island = true;
                     }
                 }
             }
@@ -120,12 +124,10 @@ public class colisiondetection extends gamepannel {
 
                     if (key.pick) 
                     {
-                        System.out.println("picked");
                         for (PlayerItem invItem : gh.gc.Items)
                         {
-                            if (invItem.name == item.id) {  // Compare int IDs
+                            if (invItem.id == item.id) {  // Compare int IDs
                                 invItem.quantity += 1;           // Increase quantity
-                                System.out.println("Stacked item: " + item.name + " (now: " + invItem.quantity + ")");
                                 break;
                             }
                         }

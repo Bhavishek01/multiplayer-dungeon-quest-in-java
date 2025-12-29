@@ -3,10 +3,6 @@ package environment;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
-import java.awt.Shape;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import main.gamehandler;
@@ -22,25 +18,10 @@ public class light
         image = new BufferedImage (gh.base, gh.height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = (Graphics2D) image.getGraphics();
 
-        // Create a screen-sized rectangle area
-        Area screenArea = new Area (new Rectangle2D.Double (0,0,gh.base,gh.height));
-
         // Get the center x and y of the light circle
         int centerX = gh.p1.centerx;
         int centerY = gh.p1.centery;
 
-        // Get the top left x and y of the light circle
-        double x = centerX - (radius/2);
-        double y = centerY - (radius/2);
-
-        // Create a light circle shape
-        Shape circleShape = new Ellipse2D.Double (x, y, radius, radius) ;
-
-        // Create a light circle area
-        Area lightArea = new Area(circleShape);
-
-        // Subtract the light circle from the screen rectangle
-        screenArea.subtract (lightArea);
         
 
         Color[] colors = new Color[25];
@@ -105,12 +86,8 @@ public class light
 
         // Set the gradient data on g2
         g2.setPaint(gPaint);
-
-        // Draw the light circlel
-        g2.fill(lightArea);
-
         // Draw the screen rectangle without the light circle area
-        g2.fill(screenArea);
+        g2.fillRect(0,0,gh.base,gh.height);
 
         g2.dispose();
     }
