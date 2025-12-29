@@ -23,6 +23,7 @@ public class entity extends gamepannel{
     public boolean item_colision;
     public boolean player_colision;
     public boolean monster_colision; 
+    public int life = 5;
 
     
 }

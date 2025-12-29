@@ -1,221 +1,307 @@
 package main;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.util.ArrayList;
-import java.util.List;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.IOException;
+import java.util.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
-import background.loginphoto;
+import javax.swing.*;
+import background.inventory_background;
 import items.*;
 
-public class inventory extends loginphoto implements ActionListener {
-    private Font arial_40,arial_50;
-    private List <JButton> buttons = new ArrayList<>(); 
-    private JButton back; 
+public class inventory extends inventory_background implements ActionListener {
+
+    private JButton back;
     public CardLayout cardLayout;
     public JPanel cardPanel;
-    JLabel name,inventory;
     gameclient gc;
 
-    public List<PlayerItem> items = new ArrayList<>();
+    public java.util.List<PlayerItem> items = new java.util.ArrayList<>();
 
-    public inventory(CardLayout cardLayout, JPanel cardPanel,gameclient gc) {
+    // Equip system
+    private int[] equippedItems;
+    private JLabel[] slotLabels = new JLabel[3];
+    private JButton[] unequipButtons = new JButton[3];
+    private Map<Integer, itemsdetail> itemCache = new HashMap<>();
+
+    private JPanel centerPanel;
+
+    public inventory(CardLayout cardLayout, JPanel cardPanel, gameclient gc) {
         this.cardLayout = cardLayout;
         this.cardPanel = cardPanel;
         this.gc = gc;
         this.items = gc.Items;
+        this.equippedItems = gc.equippedItems;
 
-        setFocusable(true);
-        requestFocusInWindow();
-        addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_Q) {
-                    openmenu();
-                    System.out.println("pressed");
-                }
-            }
-        });
+        // Cache item details
+        try {
+            itemCache.put(1, new arrow());
+            itemCache.put(2, new bow());
+            itemCache.put(3, new bullet());
+            itemCache.put(4, new gold_bullet());
+            itemCache.put(5, new golden_gun());
+            itemCache.put(6, new shoe());
+            itemCache.put(7, new silver_gun());
+            itemCache.put(8, new sword());
+            itemCache.put(9, new light());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         setLayout(new BorderLayout());
+        setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
-        arial_40 = new Font("Arial", Font.BOLD, 25);
-        arial_50 = new Font("Arial", Font.BOLD, 40);
+        // ==================== TITLE ====================
+        JLabel title = new JLabel("INVENTORY", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 50));
+        title.setForeground(Color.CYAN);
+        add(title, BorderLayout.NORTH);
 
-        JPanel top = new JPanel();
+        // ==================== EQUIPPED SLOTS ====================
+        JPanel equippedPanel = new JPanel(new GridLayout(1, 3, 50, 20));
+        equippedPanel.setOpaque(false);
 
-        top.setOpaque(false);
-        top.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-        top.setLayout(new BoxLayout(top, BoxLayout.X_AXIS));
+        for (int i = 0; i < 3; i++) {
+            final int slotIndex = i;
 
-        name = new JLabel();
-        name.setText("Player Name: " + gc.name);
-        name.setFont(arial_40);
-        name.setForeground(Color.WHITE);
-        // name.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        // name.setAlignmentY(Component.TOP_ALIGNMENT);
-        top.add(name,BorderLayout.WEST);
-        top.add(Box.createHorizontalGlue());
+            slotLabels[i] = new JLabel();
+            slotLabels[i].setHorizontalAlignment(SwingConstants.CENTER);
+            slotLabels[i].setPreferredSize(new Dimension(160, 140));
+            slotLabels[i].setBorder(BorderFactory.createLineBorder(Color.CYAN, 5));
+            slotLabels[i].setBackground(new Color(20, 20, 40));
+            slotLabels[i].setForeground(Color.WHITE);
+            slotLabels[i].setOpaque(true);
+            slotLabels[i].setFont(new Font("Arial", Font.BOLD, 18));
 
-        inventory = new JLabel("inventory");
-        inventory.setFont(arial_50);
-        inventory.setForeground(Color.WHITE); 
-        inventory.setHorizontalAlignment(SwingConstants.CENTER);
-        // promptLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // promptLabel.setAlignmentY(Component.TOP_ALIGNMENT);
-        top.add(inventory,BorderLayout.CENTER);
-        top.add(Box.createHorizontalGlue());
+            unequipButtons[i] = new JButton("Unequip");
+            unequipButtons[i].setFont(new Font("Arial", Font.BOLD, 16));
+            unequipButtons[i].setEnabled(false);
+            unequipButtons[i].addActionListener(e -> unequipItem(slotIndex));
 
-        back = new JButton("back");
-        back.setFont(arial_40);
-        back.setBorderPainted(true);
-        back.setBackground(Color.BLACK);
-        back.setForeground(Color.WHITE);
-        back.setOpaque(false);
-        back.addActionListener(this);
-        top.add(back);
-        
-        // add(top);
+            JPanel slotPanel = new JPanel(new BorderLayout(10, 10));
+            slotPanel.setOpaque(false);
+            slotPanel.add(slotLabels[i], BorderLayout.CENTER);
+            slotPanel.add(unequipButtons[i], BorderLayout.SOUTH);
 
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        // add(Box.createVerticalGlue());
-        add(top, BorderLayout.NORTH);
+            equippedPanel.add(slotPanel);
+        }
 
-        JPanel centerPanel = new JPanel();
+        JPanel topWrapper = new JPanel(new BorderLayout());
+        topWrapper.setOpaque(false);
+        topWrapper.add(equippedPanel, BorderLayout.CENTER);
+        add(topWrapper, BorderLayout.PAGE_START);
+
+        // ==================== ITEM LIST ====================
+        centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setOpaque(false);
-        centerPanel.add(Box.createVerticalGlue());
 
-            for (PlayerItem item : items) {
-                System.out.println(item.id);
-            if (item.quantity != 0) {
-                itemsdetail detail;
-                try {
-                    detail = returnobj(item.id);
-                    if (detail != null) {
-                        JButton button = new JButton();
-                        button.setIcon(new ImageIcon(detail.image));
-                        button.setBorderPainted(true);
-                        button.setBackground(Color.white);
-                        button.setForeground(Color.WHITE);
-                        button.setOpaque(true);
-                        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-                        button.addActionListener(this);
+        JScrollPane scrollPane = new JScrollPane(centerPanel);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-                        button.putClientProperty("item", item);
-                        button.putClientProperty("detail", detail);
+        add(scrollPane, BorderLayout.CENTER);
 
-                        buttons.add(button);
-                        centerPanel.add(button);
-                        centerPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-                        
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        }
-        }
+        // ==================== BACK BUTTON ====================
+        back = new JButton("Back to Menu");
+        back.setFont(new Font("Arial", Font.BOLD, 24));
+        back.setPreferredSize(new Dimension(300, 50));
+        back.setBackground(new Color(0, 100, 0));
+        back.setForeground(Color.WHITE);
+        back.addActionListener(this);
 
-        centerPanel.add(Box.createVerticalGlue());
-        add(centerPanel, BorderLayout.CENTER);
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setOpaque(false);
+        bottomPanel.add(back);
+        add(bottomPanel, BorderLayout.SOUTH);
 
+        // Build UI
+        refreshInventory();
+        updateEquippedDisplay();
     }
-    @Override
-    public void actionPerformed(ActionEvent e) 
-    {
-        if (e.getSource() == back)
-        {
-            openmenu();
-        }
-        for (JButton button : buttons) {
-            if (e.getSource() == button) {
-                PlayerItem item = (PlayerItem) button.getClientProperty("item");
-                itemsdetail detail = (itemsdetail) button.getClientProperty("detail");
 
-                if (item != null && detail != null) {
-                    String message = "<html>" +
-                            "<b>Item:</b> " + detail.name + "<br>" +
-                            "<b>Quantity:</b> " + item.quantity + "<br>" +
-                            "<b>About:</b> " + detail.about +
-                            "</html>";
+    public void refreshInventory() {
+        centerPanel.removeAll();
 
-                    JOptionPane.showMessageDialog(
-                    this,
-                    message,
-                    "Item Details",
-                    JOptionPane.PLAIN_MESSAGE
-                );
+        centerPanel.add(Box.createVerticalStrut(30));
+
+        for (PlayerItem playerItem : items) {
+            if (playerItem.quantity <= 0) continue;
+
+            itemsdetail detail = itemCache.get(playerItem.id);
+            if (detail == null) continue;
+
+            JPanel itemPanel = new JPanel();
+            itemPanel.setLayout(new BoxLayout(itemPanel, BoxLayout.X_AXIS));
+            itemPanel.setOpaque(false);
+            itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(80, 180, 255), 3),
+                BorderFactory.createEmptyBorder(10, 15, 10, 15)
+            ));
+            itemPanel.setMaximumSize(new Dimension(800, 100));
+            itemPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            // Icon
+            JLabel iconLabel = new JLabel();
+            Image scaled = detail.image.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+            iconLabel.setIcon(new ImageIcon(scaled));
+
+            // Text info
+            JPanel textPanel = new JPanel();
+            textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+            textPanel.setOpaque(false);
+
+            JLabel nameLabel = new JLabel(detail.name.toUpperCase());
+            nameLabel.setFont(new Font("Arial", Font.BOLD, 22));
+            nameLabel.setForeground(Color.CYAN);
+
+            JLabel qtyLabel = new JLabel("Quantity: " + playerItem.quantity);
+            qtyLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+            qtyLabel.setForeground(Color.YELLOW);
+
+            JLabel descLabel = new JLabel("<html><div WIDTH=300>" + detail.about + "</div></html>");
+            descLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+            descLabel.setForeground(Color.LIGHT_GRAY);
+
+            textPanel.add(nameLabel);
+            textPanel.add(qtyLabel);
+            textPanel.add(Box.createVerticalStrut(5));
+            textPanel.add(descLabel);
+
+            // Equip Button
+            JButton equipBtn = new JButton("EQUIP");
+            equipBtn.setFont(new Font("Arial", Font.BOLD, 18));
+            equipBtn.setBackground(new Color(0, 140, 0));
+            equipBtn.setForeground(Color.WHITE);
+            equipBtn.setPreferredSize(new Dimension(120, 60));
+
+            equipBtn.addActionListener(e -> {
+                int itemId = playerItem.id;
+
+                // Find empty slot
+                int emptySlot = -1;
+                for (int i = 0; i < 3; i++) {
+                    if (equippedItems[i] == 0) {
+                        emptySlot = i;
+                        break;
+                    }
                 }
-                break;
+
+                if (emptySlot == -1) {
+                    JOptionPane.showMessageDialog(this, "All equipment slots are full!", 
+                        "No Space", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                // Prevent duplicate equip
+                for (int id : equippedItems) {
+                    if (id == itemId) {
+                        JOptionPane.showMessageDialog(this, "This item is already equipped!", 
+                            "Duplicate", JOptionPane.INFORMATION_MESSAGE);
+                        return;
+                    }
+                }
+
+                // Equip
+                equippedItems[emptySlot] = itemId;
+
+                // Consume one (shoe is consumed here too)
+                playerItem.quantity -= 1;
+                if (playerItem.quantity <= 0) {
+                    items.remove(playerItem);
+                }
+
+                updateEquippedDisplay();
+                refreshInventory();
+
+                JOptionPane.showMessageDialog(this,
+                    detail.name + " equipped to Slot " + (emptySlot + 1) + "!",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            });
+
+            itemPanel.add(iconLabel);
+            itemPanel.add(Box.createHorizontalStrut(20));
+            itemPanel.add(textPanel);
+            itemPanel.add(Box.createHorizontalGlue());
+            itemPanel.add(equipBtn);
+            itemPanel.add(Box.createHorizontalStrut(20));
+
+            centerPanel.add(itemPanel);
+            centerPanel.add(Box.createVerticalStrut(15));
+        }
+
+        centerPanel.add(Box.createVerticalGlue());
+        centerPanel.revalidate();
+        centerPanel.repaint();
+    }
+
+    public void updateEquippedDisplay() {
+        for (int i = 0; i < 3; i++) {
+            int itemId = equippedItems[i];
+            if (itemId == 0) {
+                slotLabels[i].setText("<html><center><b>EMPTY</b><br>Slot " + (i+1) + "</center></html>");
+                slotLabels[i].setIcon(null);
+                unequipButtons[i].setEnabled(false);
+            } else {
+                itemsdetail item = itemCache.get(itemId);
+                if (item != null) {
+                    Image scaled = item.image.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+                    slotLabels[i].setIcon(new ImageIcon(scaled));
+                    slotLabels[i].setText("<html><center><b>" + item.name.toUpperCase() + "</b><br>Slot " + (i+1) + "</center></html>");
+                    unequipButtons[i].setEnabled(true);
+                }
             }
         }
     }
 
-    public itemsdetail returnobj(int a) throws IOException
-    {
-        switch (a) 
-        {
-            case 1:
-                arrow arrow = new arrow();
-                return arrow;
+    private void unequipItem(int slotIndex) {
+        int itemId = equippedItems[slotIndex];
+        if (itemId == 0) return;
 
-            case 2:
-                bow bow= new bow();
-                return bow;
-
-            case 3:
-                bullet bullet = new bullet();
-                return bullet;
-
-            case 4:
-                gold_bullet gold_bullet = new gold_bullet();
-                return gold_bullet;
-
-            case 5:
-                golden_gun golden_gun = new golden_gun();
-                return golden_gun;
-
-            case 6:
-                shoe shoe = new shoe();
-                return shoe;
-
-            case 7:
-                silver_gun silver_gun= new silver_gun();
-                return silver_gun;
-
-            case 8:
-                sword sword = new sword();
-                return sword;
-        
-            default:
-                return null;
+        // Shoe is one-time use → do NOT return to inventory
+        if (itemId != 6) {
+            boolean found = false;
+            for (PlayerItem pi : items) {
+                if (pi.id == itemId) {
+                    pi.quantity++;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                items.add(new PlayerItem(itemId, 1));
+            }
         }
-        
+
+        equippedItems[slotIndex] = 0;
+
+        updateEquippedDisplay();
+        refreshInventory();
+
+        JOptionPane.showMessageDialog(this, "Item unequipped!", "Unequipped", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public void openmenu()
-    {
-        System.out.println("back to menu");
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == back) {
+            openmenu();
+        }
+    }
+
+    public void openmenu() {
         gamemenu gamemenu = new gamemenu(cardLayout, cardPanel, gc);
         cardPanel.add(gamemenu, "gamemenu");
-        cardLayout.show(cardPanel, "gamemenu"); 
+        cardLayout.show(cardPanel, "gamemenu");
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible) {
+            refreshInventory();
+            updateEquippedDisplay();
+        }
     }
 }
