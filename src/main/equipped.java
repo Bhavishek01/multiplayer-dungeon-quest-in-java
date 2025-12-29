@@ -25,7 +25,7 @@ public class equipped
         cacheItems();
     }
 
-    private void cacheItems() {
+    public void cacheItems() {
         try {
             itemCache.put(1, new arrow());
             itemCache.put(2, new bow());
@@ -44,6 +44,20 @@ public class equipped
     /** Apply effects of ALL currently equipped items */
     public void apply_effects() {
         resetTemporaryEffects();
+
+        for (int i = 0; i < equippedItemIds.length; i++) {
+        int id = equippedItemIds[i];
+        if (id == 0) {
+            gh.equippedHudIcons[i] = null;
+            gh.equippedHudNames[i] = null;
+        } else {
+            itemsdetail item = itemCache.get(id);
+            if (item != null) {
+                gh.equippedHudIcons[i] = item.image;
+                gh.equippedHudNames[i] = item.name.toUpperCase();
+            }
+        }
+    }
 
         for (int id : equippedItemIds) {
             if (id == 0) continue; // empty slot
@@ -106,6 +120,7 @@ public class equipped
                     break;
                 case 6: // Shoe 
                     unequip_shoe();
+                    gh.shoeStartTime = 0; 
                     break;
                 case 7:  // silver_gun
                     unequip_silver_gun();
@@ -118,6 +133,7 @@ public class equipped
                     break;
 
             }
+            found = true;
             break;
         }
     }
@@ -160,6 +176,8 @@ public class equipped
     private void equip_shoe() {
         gh.p1.using_shoe = true;
 
+        gh.shoeStartTime = System.currentTimeMillis();
+
         // Cancel any existing timer
         if (shoeTimer != null) {
             shoeTimer.cancel();
@@ -170,14 +188,16 @@ public class equipped
         shoeTimer = new Timer();
         shoeTimer.schedule(new TimerTask() {
             @Override
-            public void run() {
+            public void run() 
+            {
                 // Time's up!
                 shoeWasConsumed = true;
-                remove_effects(6); // Auto-remove from slot
                 gh.p1.using_shoe = false;
+                gh.shoeStartTime = 0;
 
+                remove_effects(6);
                 // Notify UI to refresh equipped slots
-                if (gh.gameinventory != null) {
+                if (gh.gameinventory != null && gh.gameinventory.isVisible()) {
                     SwingUtilities.invokeLater(() -> gh.gameinventory.updateEquippedDisplay());
                 }
             }
@@ -217,6 +237,7 @@ public class equipped
             shoeTimer = null;
         }
         gh.p1.using_shoe = false;
+        gh.shoeStartTime = 0;
     }
 
     private void unequip_silver_gun()

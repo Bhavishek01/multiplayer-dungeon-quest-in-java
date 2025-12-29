@@ -1,10 +1,20 @@
 package main;
 
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.font.TextLayout;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import background.backgroundmanager;
 import environment.environment_manager;
@@ -23,6 +33,14 @@ public class gamehandler extends gamepannel implements Runnable
     public chat chat;
     public gameinventory gameinventory;
     public equipped equipmentManager;
+
+        // === EQUIPPED ITEMS HUD (Top-Right) ===
+    public BufferedImage[] equippedHudIcons = new BufferedImage[3];
+    public String[] equippedHudNames = new String[3];
+    public long shoeStartTime = 0;
+    public static final long SHOE_DURATION = 60_000; // 60 seconds
+    public BufferedImage shoeHudIcon; // For timer display
+
 
     public gameclient gc;
     public Map<String, OtherPlayer> otherPlayers = new HashMap<>();
@@ -62,6 +80,14 @@ public class gamehandler extends gamepannel implements Runnable
         this.addKeyListener(key);
         this.setFocusable(true);  // NEW
         this.requestFocusInWindow();  // NEW
+
+        try 
+        {
+            shoeHudIcon = ImageIO.read(new File("resource/items/fast_shoe.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            shoeHudIcon = null;
+        }
 
         gc.send("ENTER_GAME");
         environmentManager.setup();
@@ -161,11 +187,87 @@ public class gamehandler extends gamepannel implements Runnable
             environmentManager.draw(g2);
         }
 
+        // ==================== EQUIPPED ITEMS HUD (Top-Right) ====================
+    int hudX = base - 210;        // Adjust if needed
+    int hudY = 5;
+    int slotSize = 64;
+    int spacing = 9;
+
+    boolean hasAnyEquipped = false;
+    int shoeSlotIndex = -1; // Track which slot has the shoe
+
+    for (int i = 0; i < 3; i++) {
+        if (equippedHudIcons[i] != null) {
+            hasAnyEquipped = true;
+
+                shoeSlotIndex = i;
+            
+        }
+    }
+
+    if (hasAnyEquipped || shoeStartTime > 0) {
+
+        // Main background
+        g2.setColor(new Color(0, 0, 0, 180));
+        g2.fillRoundRect(hudX , hudY , 220, 64, 25, 25);
+
+        // Draw 3 slots horizontally
+        for (int i = 0; i < 3; i++) {
+            int slotX = hudX + (i * (slotSize + spacing));
+            int slotY = hudY ;
+
+            // Slot background
+            g2.setColor(new Color(30, 30, 60, 220));
+            g2.fillRoundRect(slotX, slotY, slotSize, slotSize, 15, 15);
+            g2.setColor(Color.CYAN);
+            g2.drawRoundRect(slotX, slotY, slotSize, slotSize, 15, 15);
+
+            // Icon
+            if (equippedHudIcons[i] != null) {
+
+                Image icon = equippedHudIcons[i].getScaledInstance(slotSize - 12, slotSize - 12, Image.SCALE_SMOOTH);
+                g2.drawImage(icon, slotX + 6, slotY + 6, null);
+
+        // ==================== SHOE TIMER (Only when active) ====================
+                if (i == shoeSlotIndex && shoeStartTime > 0)
+                {
+                    long elapsed = System.currentTimeMillis() - shoeStartTime;
+                    long remaining = SHOE_DURATION - elapsed;
+
+                    if (remaining > 0) {
+                        int secondsLeft = (int) (remaining / 1000);
+                        String timeText = secondsLeft + "s";
+
+                        g2.setColor(new Color(0, 0, 0, 150));
+                        g2.fillRoundRect(hudX +75, hudY+64, slotSize - 8, 22, 8, 8);
+
+                        // Timer text (small, bold, centered)
+                        g2.setColor(secondsLeft <= 10 ? Color.RED : Color.WHITE);
+                        g2.setFont(new Font("Arial", Font.BOLD, 16));
+
+                        TextLayout layout = new TextLayout(timeText, g2.getFont(), g2.getFontRenderContext());
+
+                        float textX = hudX +83;
+                        float textY = hudY+80;
+
+                        layout.draw(g2, textX, textY);
+                    }
+                }
+
+            } else {
+                g2.setColor(Color.DARK_GRAY);
+                g2.setFont(new Font("Arial", Font.BOLD, 30));
+                g2.drawString("—", slotX + 20, slotY + 45);
+            }
+        }
+
+    }
+
         g2.dispose();
     }
     
-    public void updateOtherPlayers(String otherplayers) {
 
+    public void updateOtherPlayers(String otherplayers) {
         String[] parts = otherplayers.split("\\|");
 
         Map<String, OtherPlayer> newPlayers = new HashMap<>();
@@ -201,3 +303,4 @@ public class gamehandler extends gamepannel implements Runnable
             otherPlayers.putAll(newPlayers);
     }
 }
+
