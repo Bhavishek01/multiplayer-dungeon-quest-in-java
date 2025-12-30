@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Iterator;
 
 
 class ClientHandler implements Runnable {
@@ -23,6 +26,8 @@ class ClientHandler implements Runnable {
     public List<PlayerItem> items = new ArrayList<>();
 
     public static final List<ClientHandler> allClients = Collections.synchronizedList(new ArrayList<>());
+    public static final List<Projectile> projectiles = Collections.synchronizedList(new ArrayList<>());
+    private static long projectileIdCounter = 0;
 
     private static final int MAX_CHAT_HISTORY = 10;
     private static final List<String> globalChatHistory = Collections.synchronizedList(new ArrayList<>());
@@ -36,21 +41,58 @@ class ClientHandler implements Runnable {
     @Override
     public void run() 
     {
-        try {
+        try 
+        {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             String message;
             while ((message = in.readLine()) != null) {
-             System.out.println(message);
-                if (playerId == null) {
-                    handleLogin(message);
-                } 
-                else 
-                {
-                    handleGameMessage(message);
-                }
+            System.out.println(message);
+            if (message.startsWith("SHOOT|")) {
+                if (playerId == null || !GameEnter) continue;
+
+                String[] parts = message.substring(6).split("\\|");
+                if (parts.length != 2) continue;
+
+                try {
+                    double targetX = Double.parseDouble(parts[0]);
+                    double targetY = Double.parseDouble(parts[1]);
+
+                    // Validation (distance, etc.)
+                    double dx = targetX - x;
+                    double dy = targetY - y;
+                    double dist = Math.hypot(dx, dy);
+                    if (dist < 50 || dist > 500) continue;
+
+                    double startX = x + 24;  // Player center
+                    double startY = y + 24;
+
+                    Projectile proj = new Projectile(playerId, startX, startY, targetX, targetY);
+                    proj.id = projectileIdCounter++;
+
+                    synchronized (projectiles) {
+                        projectiles.add(proj);
+                    }
+
+                    System.out.println(playerName + " shot projectile #" + proj.id);
+
+                    // *** IMMEDIATE BROADCAST - FIXES THE ISSUE ***
+                    broadcastWorld();
+                } catch (Exception ignored) {}
+                continue;
+
             }
+            if (playerId == null) {
+                handleLogin(message);
+            } 
+            else 
+            {
+                handleGameMessage(message);
+            }
+
+            }
+
         } catch (Exception e) {
             System.out.println("Player disconnected: " + playerId);
         } finally {
@@ -196,9 +238,12 @@ class ClientHandler implements Runnable {
     private void broadcastWorld() 
     {
         StringBuilder world = new StringBuilder("WORLD");
-        synchronized (allClients) {
-            for (ClientHandler client : allClients ) {
-                if (client.playerId != null && client.GameEnter) {  // only logged-in players
+        synchronized (allClients) 
+        {
+            for (ClientHandler client : allClients ) 
+            {
+                if (client.playerId != null && client.GameEnter) 
+                {
                     world.append("|")
                         .append(client.playerId).append("|")
                         .append(client.playerName).append("|")
@@ -208,7 +253,36 @@ class ClientHandler implements Runnable {
                 }
             }
         }
+
+        StringBuilder projData = new StringBuilder();
+        synchronized (projectiles) 
+        {
+            Iterator<Projectile> it = projectiles.iterator();
+            while (it.hasNext()) 
+            {
+                Projectile p = it.next();
+                p.update(); // Update position
+
+                if (!p.active) {
+                    it.remove();
+                    continue;
+                }
+
+                if (projData.length() > 0) projData.append("#");
+                projData.append(p.id).append(",")
+                        .append(p.ownerId).append(",")
+                        .append((int)p.x).append(",")
+                        .append((int)p.y);
+            }
+        }
+
+        // Modify finalMsg to include projectiles
         String finalMsg = world.toString();
+        if (projData.length() > 0) {
+            finalMsg += "|PROJECTILES|" + projData.toString();
+        } else {
+            finalMsg += "|PROJECTILES|";
+        }
 
         synchronized (allClients) {
             for (ClientHandler client : allClients) {
@@ -218,6 +292,7 @@ class ClientHandler implements Runnable {
                 } catch (Exception ignored) {}
             }
         }
+
     }
 
     private void logout() 

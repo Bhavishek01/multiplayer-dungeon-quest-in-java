@@ -10,8 +10,13 @@ import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
@@ -39,6 +44,8 @@ public class gamehandler extends gamepannel implements Runnable
     public long shoeStartTime = 0;
     public static final long SHOE_DURATION = 60_000; // 60 seconds
     public BufferedImage shoeHudIcon; // For timer display
+
+    public List<Projectile> projectiles = new ArrayList<>();
 
 
     public gameclient gc;
@@ -77,6 +84,33 @@ public class gamehandler extends gamepannel implements Runnable
         cardPanel.add(chat, "chat");
         gc.setGameHandler(this);
         this.addKeyListener(key);
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1) return; // Only left-click
+
+                // Screen click position
+                int screenX = e.getX();
+                int screenY = e.getY();
+
+                // Convert to MAP coordinates (player-centered)
+                double rawMapX = p1.entity_map_X + screenX - p1.centerx;
+                double rawMapY = p1.entity_map_Y + screenY - p1.centery;
+
+                // Snap to nearest TILE CENTER for precise targeting
+                int targetMapX = (int) (Math.round(rawMapX / tiles) * tiles + tiles / 2.0);
+                int targetMapY = (int) (Math.round(rawMapY / tiles) * tiles + tiles / 2.0);
+
+                // Start is player's CURRENT map position (top-left)
+                int startX = p1.entity_map_X;
+                int startY = p1.entity_map_Y;
+
+                // Send to server
+                gc.send("SHOOT|" + targetMapX + "|" + targetMapY);
+                            }
+                        });
+        
         this.setFocusable(true);  // NEW
         this.requestFocusInWindow();  // NEW
 
@@ -184,6 +218,21 @@ public class gamehandler extends gamepannel implements Runnable
         if(light_on && !light_use)
         {
             environmentManager.draw(g2);
+        }
+        
+        // Draw projectiles
+        for (Projectile proj : projectiles) {
+            if (!proj.active) continue;
+
+            int screenX = proj.getScreenX(this);
+            int screenY = proj.getScreenY(this);
+
+            if (screenX >= -50 && screenX <= base + 50 && screenY >= -50 && screenY <= height + 50) {
+                g2.setColor(Color.RED);
+                g2.fillOval(screenX - 8, screenY - 8, 16, 16);
+                g2.setColor(Color.ORANGE);
+                g2.fillOval(screenX - 5, screenY - 5, 10, 10);
+            }
         }
 
         // ==================== EQUIPPED ITEMS HUD (Top-Right) ====================
