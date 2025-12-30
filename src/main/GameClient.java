@@ -103,6 +103,8 @@ public class gameclient {
                 break;
 
             case "PROJECTILE":
+                if (gameHandler == null) break;  // Ignore if game not started
+
                 if (parts.length != 6) break;
                 try {
                     String ownerId = parts[1];
@@ -114,19 +116,27 @@ public class gameclient {
                     Projectile proj = new Projectile(startX, startY, targetX, targetY);
                     gameHandler.projectiles.add(proj);
 
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
 
             case "WORLD":
-                if (message.length() <= 6) break;
-                String data = message.substring(6); // Remove "WORLD|"
+                // If gameHandler is not ready yet, ignore WORLD messages
+                if (gameHandler == null) {
+                    System.out.println("Received WORLD message too early - ignoring until game starts");
+                    break;
+                }
 
-                // === Parse Players Only ===
+                if (message.length() <= 6) break;
+                String data = message.substring(6);
+
+                // === Parse Players ===
                 HashMap<String, OtherPlayer> newPlayers = new HashMap<>();
 
                 if (!data.isEmpty()) {
                     String[] playerParts = data.split("\\|");
-                    for (int i = 0; i < playerParts.length; i += 5) { // 5 fields: id|name|x|y|dir
+                    for (int i = 0; i < playerParts.length; i += 5) {
                         if (i + 4 >= playerParts.length) break;
 
                         String id = playerParts[i];
@@ -135,11 +145,12 @@ public class gameclient {
                         int y = Integer.parseInt(playerParts[i + 3]);
                         String dir = playerParts[i + 4];
 
-                        if (id.equals(this.id)) continue; // Skip self
+                        if (id.equals(this.id)) continue;
 
                         OtherPlayer op = newPlayers.get(id);
                         if (op == null) {
                             op = new OtherPlayer(name);
+                            // Safe to copy sprites now — gameHandler.p1 exists
                             op.up1 = gameHandler.p1.up1;    op.up2 = gameHandler.p1.up2;
                             op.down1 = gameHandler.p1.down1;  op.down2 = gameHandler.p1.down2;
                             op.left1 = gameHandler.p1.left1;  op.left2 = gameHandler.p1.left2;
@@ -159,6 +170,7 @@ public class gameclient {
                 gameHandler.otherPlayers.clear();
                 gameHandler.otherPlayers.putAll(newPlayers);
                 break;
+
             case "LOGIN_SUCCESS":
                         
                     this.name = parts[2];

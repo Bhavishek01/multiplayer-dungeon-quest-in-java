@@ -26,6 +26,7 @@ class ClientHandler implements Runnable {
     public List<PlayerItem> items = new ArrayList<>();
 
     public static final List<ClientHandler> allClients = Collections.synchronizedList(new ArrayList<>());
+    
     public static final List<Projectile> projectiles = Collections.synchronizedList(new ArrayList<>());
     private static long projectileIdCounter = 0;
 
