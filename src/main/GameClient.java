@@ -102,28 +102,31 @@ public class gameclient {
                     }
                 break;
 
+            case "PROJECTILE":
+                if (parts.length != 6) break;
+                try {
+                    String ownerId = parts[1];
+                    double startX = Integer.parseInt(parts[2]);
+                    double startY = Integer.parseInt(parts[3]);
+                    double targetX = Integer.parseInt(parts[4]);
+                    double targetY = Integer.parseInt(parts[5]);
+
+                    Projectile proj = new Projectile(startX, startY, targetX, targetY);
+                    gameHandler.projectiles.add(proj);
+
+                } catch (Exception ignored) {}
+                break;
+
             case "WORLD":
                 if (message.length() <= 6) break;
                 String data = message.substring(6); // Remove "WORLD|"
 
-                // Find the position of "|PROJECTILES|" to separate players from projectiles
-                int projIndex = data.indexOf("|PROJECTILES|");
-                String playerData;
-                String projectileData = "";
-
-                if (projIndex != -1) {
-                    playerData = data.substring(0, projIndex);
-                    projectileData = data.substring(projIndex + 12); // Skip "|PROJECTILES|"
-                } else {
-                    playerData = data;
-                }
-
-                // === Parse Players ===
+                // === Parse Players Only ===
                 HashMap<String, OtherPlayer> newPlayers = new HashMap<>();
 
-                if (!playerData.isEmpty()) {
-                    String[] playerParts = playerData.split("\\|");
-                    for (int i = 0; i < playerParts.length; i += 5) { // 5 fields per player
+                if (!data.isEmpty()) {
+                    String[] playerParts = data.split("\\|");
+                    for (int i = 0; i < playerParts.length; i += 5) { // 5 fields: id|name|x|y|dir
                         if (i + 4 >= playerParts.length) break;
 
                         String id = playerParts[i];
@@ -132,13 +135,11 @@ public class gameclient {
                         int y = Integer.parseInt(playerParts[i + 3]);
                         String dir = playerParts[i + 4];
 
-                        // Skip self
-                        if (id.equals(this.id)) continue;
+                        if (id.equals(this.id)) continue; // Skip self
 
                         OtherPlayer op = newPlayers.get(id);
                         if (op == null) {
                             op = new OtherPlayer(name);
-                            // Copy sprites from local player
                             op.up1 = gameHandler.p1.up1;    op.up2 = gameHandler.p1.up2;
                             op.down1 = gameHandler.p1.down1;  op.down2 = gameHandler.p1.down2;
                             op.left1 = gameHandler.p1.left1;  op.left2 = gameHandler.p1.left2;
@@ -149,39 +150,15 @@ public class gameclient {
                         op.entity_map_X = x;
                         op.entity_map_Y = y;
                         op.direction = dir;
-                        op.count++; // animation
+                        op.count++;
 
                         newPlayers.put(id, op);
                     }
                 }
 
-                // Update live map
                 gameHandler.otherPlayers.clear();
                 gameHandler.otherPlayers.putAll(newPlayers);
-
-                // === Parse Projectiles ===
-                gameHandler.projectiles.clear();
-
-                if (!projectileData.isEmpty()) {
-                    String[] projList = projectileData.split("#");
-                    for (String projStr : projList) {
-                        String[] p = projStr.split(",");
-                        if (p.length < 4) continue;
-
-                        try {
-                            long projId = Long.parseLong(p[0]);
-                            String ownerId = p[1];
-                            double projX = Integer.parseInt(p[2]);
-                            double projY = Integer.parseInt(p[3]);
-
-                            Projectile proj = new Projectile(projId, ownerId, projX, projY);
-                            proj.active = true;
-                            gameHandler.projectiles.add(proj);
-                        } catch (Exception ignored) {}
-                    }
-                }
                 break;
-                
             case "LOGIN_SUCCESS":
                         
                     this.name = parts[2];

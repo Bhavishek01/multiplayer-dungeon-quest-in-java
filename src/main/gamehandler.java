@@ -20,6 +20,8 @@ import java.awt.event.MouseEvent;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+import java.util.Iterator;
+
 import background.backgroundmanager;
 import environment.environment_manager;
 import gameplayers.OtherPlayer;
@@ -171,6 +173,13 @@ public class gamehandler extends gamepannel implements Runnable
 
             else if (!ispaused && !ischatting && !isinventory_open) {
                 p1.update();
+                for (Iterator<Projectile> it = projectiles.iterator(); it.hasNext(); ) {
+                    Projectile proj = it.next();
+                    proj.update();
+                    if (!proj.active) {
+                        it.remove();
+                    }
+                }
                 repaint();
             }
             // NOTE: If you have multiplayer network updates (e.g., gc.pollServer()), add them here outside the if(!ispaused) so they continue in background.

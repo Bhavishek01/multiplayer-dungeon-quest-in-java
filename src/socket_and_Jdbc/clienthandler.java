@@ -48,48 +48,53 @@ class ClientHandler implements Runnable {
 
             String message;
             while ((message = in.readLine()) != null) {
-            System.out.println(message);
-            if (message.startsWith("SHOOT|")) {
-                if (playerId == null || !GameEnter) continue;
+                System.out.println(message);
+                if (playerId == null) {
+                    handleLogin(message);
+                }
+                else if (message.startsWith("SHOOT|")) {
+                    if (playerId == null || !GameEnter) continue;
 
-                String[] parts = message.substring(6).split("\\|");
-                if (parts.length != 2) continue;
+                    String[] parts = message.substring(6).split("\\|");
+                    if (parts.length != 2) continue;
 
-                try {
-                    double targetX = Double.parseDouble(parts[0]);
-                    double targetY = Double.parseDouble(parts[1]);
+                    try {
+                        double targetX = Double.parseDouble(parts[0]);
+                        double targetY = Double.parseDouble(parts[1]);
 
-                    // Validation (distance, etc.)
-                    double dx = targetX - x;
-                    double dy = targetY - y;
-                    double dist = Math.hypot(dx, dy);
-                    if (dist < 50 || dist > 500) continue;
+                        // Validate distance
+                        double dx = targetX - x;
+                        double dy = targetY - y;
+                        double dist = Math.hypot(dx, dy);
+                        if (dist < 50 || dist > 500) continue;
 
-                    double startX = x + 24;  // Player center
-                    double startY = y + 24;
+                        // Start from player center
+                        double startX = x + 24;
+                        double startY = y + 24;
 
-                    Projectile proj = new Projectile(playerId, startX, startY, targetX, targetY);
-                    proj.id = projectileIdCounter++;
+                        // Build one-time creation message
+                        String projMsg = "PROJECTILE|" + playerId + "|" + 
+                                        (int)startX + "|" + (int)startY + "|" + 
+                                        (int)targetX + "|" + (int)targetY;
 
-                    synchronized (projectiles) {
-                        projectiles.add(proj);
-                    }
+                        // Broadcast to ALL clients (including shooter)
+                        synchronized (allClients) {
+                            for (ClientHandler client : allClients) {
+                                try {
+                                    client.out.println(projMsg);
+                                } catch (Exception ignored) {}
+                            }
+                        }
 
-                    System.out.println(playerName + " shot projectile #" + proj.id);
+                        System.out.println(playerName + " shot projectile to (" + targetX + "," + targetY + ")");
 
-                    // *** IMMEDIATE BROADCAST - FIXES THE ISSUE ***
-                    broadcastWorld();
-                } catch (Exception ignored) {}
-                continue;
-
-            }
-            if (playerId == null) {
-                handleLogin(message);
-            } 
-            else 
-            {
-                handleGameMessage(message);
-            }
+                    } catch (Exception ignored) {}
+                    continue;
+                }
+                else 
+                {
+                    handleGameMessage(message);
+                }
 
             }
 
