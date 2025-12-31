@@ -102,22 +102,27 @@ public class gameclient {
                     }
                 break;
 
-            case "PROJECTILE":
-                if (gameHandler == null) break;  // Ignore if game not started
-
-                if (parts.length != 6) break;
-                try {
-                    String ownerId = parts[1];
-                    double startX = Integer.parseInt(parts[2]);
-                    double startY = Integer.parseInt(parts[3]);
-                    double targetX = Integer.parseInt(parts[4]);
-                    double targetY = Integer.parseInt(parts[5]);
-
-                    Projectile proj = new Projectile(startX, startY, targetX, targetY);
-                    gameHandler.projectiles.add(proj);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
+            case "PROJECTILES":
+                String projData = message.substring("PROJECTILES|".length());
+                synchronized (gameHandler.clientProjectiles) {
+                    gameHandler.clientProjectiles.clear();
+                    if (!projData.isEmpty()) {
+                        String[] projArray = projData.split(";");
+                        for (String p : projArray) {
+                            String[] partss = p.split(",");
+                            if (partss.length >= 4) {
+                                double x = Double.parseDouble(partss[0]);
+                                double y = Double.parseDouble(partss[1]);
+                                double tx = Double.parseDouble(partss[2]);
+                                double ty = Double.parseDouble(partss[3]);
+                                Projectile proj = new Projectile(x, y, tx, ty);
+                                // override start position to current
+                                proj.x = x;
+                                proj.y = y;
+                                gameHandler.clientProjectiles.add(proj);
+                            }
+                        }
+                    }
                 }
                 break;
 

@@ -47,7 +47,8 @@ public class gamehandler extends gamepannel implements Runnable
     public static final long SHOE_DURATION = 60_000; // 60 seconds
     public BufferedImage shoeHudIcon; // For timer display
 
-    public List<Projectile> projectiles = new ArrayList<>();
+    public List<Projectile> localProjectiles = new ArrayList<>();
+    public List<Projectile> clientProjectiles = new ArrayList<>();
 
 
     public gameclient gc;
@@ -71,6 +72,7 @@ public class gamehandler extends gamepannel implements Runnable
     public itemsdetail gameitems[] = new itemsdetail[9];
     public itemspawn itemspawn = new itemspawn(this);
     public environment_manager environmentManager = new environment_manager(this);
+    BufferedImage projectileImage;
     
     Thread gameThread;
 
@@ -86,38 +88,43 @@ public class gamehandler extends gamepannel implements Runnable
         cardPanel.add(chat, "chat");
         gc.setGameHandler(this);
         this.addKeyListener(key);
+       
 
         addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() != MouseEvent.BUTTON1) return; // Only left-click
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (e.getButton() != MouseEvent.BUTTON1) return;
 
-                // Screen click position
-                int screenX = e.getX();
-                int screenY = e.getY();
+            int screenX = e.getX();
+            int screenY = e.getY();
 
-                // Convert to MAP coordinates (player-centered)
-                double rawMapX = p1.entity_map_X + screenX - p1.centerx;
-                double rawMapY = p1.entity_map_Y + screenY - p1.centery;
+            double worldX = p1.entity_map_X + screenX - p1.centerx;
+            double worldY = p1.entity_map_Y + screenY - p1.centery;
 
-                // Snap to nearest TILE CENTER for precise targeting
-                int targetMapX = (int) (Math.round(rawMapX / tiles) * tiles + tiles / 2.0);
-                int targetMapY = (int) (Math.round(rawMapY / tiles) * tiles + tiles / 2.0);
+            // Optional: snap to tile center (remove if you want free aim)
+            // int targetMapX = (int)(Math.round(worldX / tiles) * tiles + tiles / 2.0);
+            // int targetMapY = (int)(Math.round(worldY / tiles) * tiles + tiles / 2.0);
 
-                // Start is player's CURRENT map position (top-left)
-                int startX = p1.entity_map_X;
-                int startY = p1.entity_map_Y;
+            double startX = p1.entity_map_X + 24; // player center
+            double startY = p1.entity_map_Y + 24;
 
-                // Send to server
-                gc.send("SHOOT|" + targetMapX + "|" + targetMapY);
-                            }
-                        });
+            // === ADD LOCAL PROJECTILE FOR INSTANT VISUAL ===
+            Projectile localProj = new Projectile(startX, startY, worldX, worldY);
+            synchronized (localProjectiles) {
+                localProjectiles.add(localProj);
+            }
+
+            // === SEND TO SERVER FOR OTHERS TO SEE ===
+            gc.send("SHOOT|" + worldX + "|" + worldY);
+        }
+    });
         
         this.setFocusable(true);  // NEW
         this.requestFocusInWindow();  // NEW
 
         try 
         {
+            projectileImage = ImageIO.read(new File("resource/object/bigrock.png"));
             shoeHudIcon = ImageIO.read(new File("resource/items/fast_shoe.png"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -173,13 +180,16 @@ public class gamehandler extends gamepannel implements Runnable
 
             else if (!ispaused && !ischatting && !isinventory_open) {
                 p1.update();
-                for (Iterator<Projectile> it = projectiles.iterator(); it.hasNext(); ) {
-                    Projectile proj = it.next();
-                    proj.update();
-                    if (!proj.active) {
-                        it.remove();
+                synchronized (localProjectiles) {
+                Iterator<Projectile> it = localProjectiles.iterator();
+                while (it.hasNext()) {
+                    Projectile p = it.next();
+                    p.update();
+                    if (!p.active) {
+                        it.remove(); // safe removal during iteration
                     }
                 }
+            }
                 repaint();
             }
             // NOTE: If you have multiplayer network updates (e.g., gc.pollServer()), add them here outside the if(!ispaused) so they continue in background.
@@ -229,18 +239,29 @@ public class gamehandler extends gamepannel implements Runnable
             environmentManager.draw(g2);
         }
         
-        // Draw projectiles
-        for (Projectile proj : projectiles) {
-            if (!proj.active) continue;
+        // Draw local projectiles (your own shots)
+        synchronized (localProjectiles) {
+            for (Projectile proj : localProjectiles) {
+                if (proj.active) {
+                    int screenX = proj.getScreenX(this);
+                    int screenY = proj.getScreenY(this);
+                    if (screenX > -48 && screenX < base && screenY > -48 && screenY < height) {
+                        g2.drawImage(projectileImage, screenX - 8, screenY - 8, 16, 16, null);
+                    }
+                }
+            }
+        }
 
-            int screenX = proj.getScreenX(this);
-            int screenY = proj.getScreenY(this);
-
-            if (screenX >= -50 && screenX <= base + 50 && screenY >= -50 && screenY <= height + 50) {
-                g2.setColor(Color.RED);
-                g2.fillOval(screenX - 8, screenY - 8, 16, 16);
-                g2.setColor(Color.ORANGE);
-                g2.fillOval(screenX - 5, screenY - 5, 10, 10);
+        // Draw other players' projectiles (received from server)
+        synchronized (clientProjectiles) {
+            for (Projectile proj : clientProjectiles) {
+                if (proj.active) {
+                    int screenX = proj.getScreenX(this);
+                    int screenY = proj.getScreenY(this);
+                    if (screenX > -48 && screenX < base && screenY > -48 && screenY < height) {
+                        g2.drawImage(projectileImage, screenX - 8, screenY - 8, 16, 16, null);
+                    }
+                }
             }
         }
 
