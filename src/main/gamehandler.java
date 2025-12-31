@@ -91,33 +91,33 @@ public class gamehandler extends gamepannel implements Runnable
        
 
         addMouseListener(new MouseAdapter() {
-        @Override
-        public void mousePressed(MouseEvent e) {
-            if (e.getButton() != MouseEvent.BUTTON1) return;
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1 || ispaused || ischatting || isinventory_open) return;
 
-            int screenX = e.getX();
-            int screenY = e.getY();
+                int screenX = e.getX();
+                int screenY = e.getY();
 
-            double worldX = p1.entity_map_X + screenX - p1.centerx;
-            double worldY = p1.entity_map_Y + screenY - p1.centery;
+                double worldX = p1.entity_map_X + screenX - p1.centerx;
+                double worldY = p1.entity_map_Y + screenY - p1.centery;
 
-            // Optional: snap to tile center (remove if you want free aim)
-            // int targetMapX = (int)(Math.round(worldX / tiles) * tiles + tiles / 2.0);
-            // int targetMapY = (int)(Math.round(worldY / tiles) * tiles + tiles / 2.0);
+                // Snap to tile center (optional - remove for free aim)
+                // worldX = Math.round(worldX / tiles) * tiles + tiles / 2.0;
+                // worldY = Math.round(worldY / tiles) * tiles + tiles / 2.0;
 
-            double startX = p1.entity_map_X + 24; // player center
-            double startY = p1.entity_map_Y + 24;
+                double startX = p1.entity_map_X + 24; // Player center
+                double startY = p1.entity_map_Y + 24;
 
-            // === ADD LOCAL PROJECTILE FOR INSTANT VISUAL ===
-            Projectile localProj = new Projectile(startX, startY, worldX, worldY);
-            synchronized (localProjectiles) {
-                localProjectiles.add(localProj);
+                // Create LOCAL projectile for instant feedback
+                Projectile localProj = new Projectile(startX, startY, worldX, worldY, gc.id);
+                synchronized (localProjectiles) {
+                    localProjectiles.add(localProj);
+                }
+
+                // Send to server (target only - server uses your last known pos)
+                gc.send("SHOOT|" + worldX + "|" + worldY);
             }
-
-            // === SEND TO SERVER FOR OTHERS TO SEE ===
-            gc.send("SHOOT|" + worldX + "|" + worldY);
-        }
-    });
+        });
         
         this.setFocusable(true);  // NEW
         this.requestFocusInWindow();  // NEW
@@ -190,6 +190,7 @@ public class gamehandler extends gamepannel implements Runnable
                     }
                 }
             }
+            ProjectileCollision.checkCollisions(this);
                 repaint();
             }
             // NOTE: If you have multiplayer network updates (e.g., gc.pollServer()), add them here outside the if(!ispaused) so they continue in background.

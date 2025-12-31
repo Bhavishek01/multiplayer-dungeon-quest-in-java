@@ -103,22 +103,21 @@ public class gameclient {
                 break;
 
             case "PROJECTILES":
-                String projData = message.substring("PROJECTILES|".length());
                 synchronized (gameHandler.clientProjectiles) {
                     gameHandler.clientProjectiles.clear();
+                    String projData = message.substring("PROJECTILES|".length());
                     if (!projData.isEmpty()) {
                         String[] projArray = projData.split(";");
                         for (String p : projArray) {
+                            if (p.trim().isEmpty()) continue;
                             String[] partss = p.split(",");
-                            if (partss.length >= 4) {
-                                double x = Double.parseDouble(partss[0]);
-                                double y = Double.parseDouble(partss[1]);
-                                double tx = Double.parseDouble(partss[2]);
-                                double ty = Double.parseDouble(partss[3]);
-                                Projectile proj = new Projectile(x, y, tx, ty);
-                                // override start position to current
-                                proj.x = x;
-                                proj.y = y;
+                            if (partss.length >= 5) {
+                                String owner = partss[0];
+                                double x = Double.parseDouble(partss[1]);
+                                double y = Double.parseDouble(partss[2]);
+                                double tx = Double.parseDouble(partss[3]);
+                                double ty = Double.parseDouble(partss[4]);
+                                Projectile proj = new Projectile(x, y, tx, ty, owner);
                                 gameHandler.clientProjectiles.add(proj);
                             }
                         }
