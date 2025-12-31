@@ -180,17 +180,31 @@ public class gamehandler extends gamepannel implements Runnable
 
             else if (!ispaused && !ischatting && !isinventory_open) {
                 p1.update();
+                // Update LOCAL projectiles (your shots)
                 synchronized (localProjectiles) {
-                Iterator<Projectile> it = localProjectiles.iterator();
-                while (it.hasNext()) {
-                    Projectile p = it.next();
-                    p.update();
-                    if (!p.active) {
-                        it.remove(); // safe removal during iteration
+                    Iterator<Projectile> it = localProjectiles.iterator();
+                    while (it.hasNext()) {
+                        Projectile p = it.next();
+                        p.update();
+                        if (!p.active) {
+                            it.remove();
+                        }
                     }
                 }
-            }
-            ProjectileCollision.checkCollisions(this);
+
+                // Update CLIENT projectiles (others' shots from server)
+                synchronized (clientProjectiles) {
+                    Iterator<Projectile> it = clientProjectiles.iterator();
+                    while (it.hasNext()) {
+                        Projectile p = it.next();
+                        p.update();
+                        if (!p.active) {
+                            it.remove();
+                        }
+                    }
+                }
+
+                ProjectileCollision.checkCollisions(this);
                 repaint();
             }
             // NOTE: If you have multiplayer network updates (e.g., gc.pollServer()), add them here outside the if(!ispaused) so they continue in background.

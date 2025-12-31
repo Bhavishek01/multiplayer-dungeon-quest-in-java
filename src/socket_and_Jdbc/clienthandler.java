@@ -174,17 +174,14 @@ class ClientHandler implements Runnable {
     {
         String[] parts = msg.split("\\|");
         
-        if ("POS".equals(parts[0]))
-        {
-        try 
-            {
-            this.x = Integer.parseInt(parts[1]);
-            this.y = Integer.parseInt(parts[2]);
-            this.direction = parts[3];
-            broadcastWorld();  // Send updated world to everyone
-            } 
-        catch (Exception ignored) {}
-        }
+        if("POS".equals(parts[0]))
+            try {
+                this.x = (int) Double.parseDouble(parts[1]);
+                this.y = (int) Double.parseDouble(parts[2]);
+                this.direction = parts[3];
+                broadcastWorld();
+            } catch (Exception ignored) {}
+            
 
         else if("ENTER_GAME".equals(parts[0]))
         {
@@ -210,11 +207,33 @@ class ClientHandler implements Runnable {
                 items.add(new PlayerItem(name, qty));
                 checker.add_items(playerId, name, qty);
             }
-
-            
-            
+   
         }
+
         
+        else if ("SHOOT".equals(parts[0])){
+            double tx = Double.parseDouble(parts[1]);
+            double ty = Double.parseDouble(parts[2]);
+            Projectile proj = new Projectile(this.x, this.y, tx, ty, playerId);
+            synchronized (projectiles) {
+                projectiles.add(proj);
+            }
+
+        // Server update loop (every tick):
+        synchronized (projectiles) {
+            Iterator<Projectile> it = projectiles.iterator();
+            while (it.hasNext()) {
+                Projectile p = it.next();
+                p.update();
+                if (!p.active) {
+                    it.remove();
+                }
+                // Optional: server-side collisions here too
+            }
+        }
+    }
+
+
         else if ("CHAT".equals(parts[0]))
         {
             String formattedMessage = playerName + ": " + parts[1];
@@ -241,64 +260,57 @@ class ClientHandler implements Runnable {
     }
         
 
-    private void broadcastWorld() 
-    {
-        StringBuilder world = new StringBuilder("WORLD");
-        synchronized (allClients) 
-        {
-            for (ClientHandler client : allClients ) 
-            {
-                if (client.playerId != null && client.GameEnter) 
-                {
-                    world.append("|")
-                        .append(client.playerId).append("|")
-                        .append(client.playerName).append("|")
-                        .append(client.x).append("|")
-                        .append(client.y).append("|")
-                        .append(client.direction);
-                }
-            }
-        }
-
-        StringBuilder projData = new StringBuilder();
-        synchronized (projectiles) 
-        {
+    private void broadcastWorld() {
+        // === UPDATE ALL PROJECTILES FIRST ===
+        synchronized (projectiles) {
             Iterator<Projectile> it = projectiles.iterator();
-            while (it.hasNext()) 
-            {
+            while (it.hasNext()) {
                 Projectile p = it.next();
-                p.update(); // Update position
-
+                p.update();
                 if (!p.active) {
                     it.remove();
-                    continue;
                 }
-
-                if (projData.length() > 0) projData.append("#");
-                projData.append(p.id).append(",")
-                        .append(p.ownerId).append(",")
-                        .append((int)p.x).append(",")
-                        .append((int)p.y);
             }
         }
 
-        // Modify finalMsg to include projectiles
-        String finalMsg = world.toString();
-        if (projData.length() > 0) {
-            finalMsg += "|PROJECTILES|" + projData.toString();
-        } else {
-            finalMsg += "|PROJECTILES|";
+        // === BUILD PLAYER DATA ===
+        StringBuilder playerData = new StringBuilder();
+        synchronized (allClients) {
+            for (ClientHandler client : allClients) {
+                if (client.playerId != null) {
+                    playerData.append(client.playerId).append("|")
+                            .append(client.playerName).append("|")
+                            .append(client.x).append("|")  // Use int or (int)client.x if double
+                            .append(client.y).append("|")
+                            .append(client.direction).append("|");
+                }
+            }
         }
-
+        
+        // === BUILD PROJECTILE DATA ===
+        StringBuilder projData = new StringBuilder();
+        synchronized (projectiles) {
+            for (Projectile p : projectiles) {
+                if (p.active) {
+                    projData.append(p.ownerId).append(",")
+                        .append((int)p.x).append(",")
+                        .append((int)p.y).append(",")
+                        .append((int)p.targetX).append(",")
+                        .append((int)p.targetY).append(";");
+                }
+            }
+        }
+        
+        // === BROADCAST ===
+        String worldMsg = "WORLD|" + playerData.toString() + "PROJECTILES|" + projData.toString();
+        
         synchronized (allClients) {
             for (ClientHandler client : allClients) {
                 try {
-                    client.out.println(finalMsg);
-                    System.out.println("broadcasting" + finalMsg);
+                    client.out.println(worldMsg);
                 } catch (Exception ignored) {}
             }
         }
-
     }
 
     private void logout() 

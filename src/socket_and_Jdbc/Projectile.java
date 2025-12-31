@@ -11,7 +11,7 @@ public class Projectile {
     public int maxDistance = 400;
     public boolean active = true;
 
-    public Projectile(String ownerId, double startX, double startY, double targetX, double targetY) {
+    public Projectile(double startX, double startY, double targetX, double targetY, String ownerId) {
         this.ownerId = ownerId;
         this.startX = startX;
         this.startY = startY;

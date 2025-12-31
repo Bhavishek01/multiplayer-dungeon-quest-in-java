@@ -102,77 +102,103 @@ public class gameclient {
                     }
                 break;
 
-            case "PROJECTILES":
-                synchronized (gameHandler.clientProjectiles) {
-                    gameHandler.clientProjectiles.clear();
-                    String projData = message.substring("PROJECTILES|".length());
-                    if (!projData.isEmpty()) {
-                        String[] projArray = projData.split(";");
-                        for (String p : projArray) {
-                            if (p.trim().isEmpty()) continue;
-                            String[] partss = p.split(",");
-                            if (partss.length >= 5) {
-                                String owner = partss[0];
-                                double x = Double.parseDouble(partss[1]);
-                                double y = Double.parseDouble(partss[2]);
-                                double tx = Double.parseDouble(partss[3]);
-                                double ty = Double.parseDouble(partss[4]);
-                                Projectile proj = new Projectile(x, y, tx, ty, owner);
-                                gameHandler.clientProjectiles.add(proj);
+            case "WORLD":
+                if (message.length() <= 6) break;
+                String data = message.substring(6);  // Everything after "WORLD|"
+                
+                // Split by | but find PROJECTILES delimiter first
+                String[] allParts = data.split("\\|");
+                
+                // Find where PROJECTILES starts
+                int projIndex = -1;
+                for (int i = 0; i < allParts.length; i++) {
+                    if ("PROJECTILES".equals(allParts[i])) {
+                        projIndex = i;
+                        break;
+                    }
+                }
+                
+                // === PARSE PLAYERS (everything BEFORE PROJECTILES) ===
+                Map<String, OtherPlayer> newPlayers = new HashMap<>();
+                if (projIndex == -1) {
+                    // No PROJECTILES - parse entire data as players
+                    projIndex = allParts.length;
+                }
+                
+                // Parse player groups: id|name|x|y|dir (5 parts each)
+                for (int i = 0; i < projIndex; i += 5) {
+                    if (i + 4 >= projIndex) break;  // Not enough parts for full player
+                    
+                    try {
+                        String playerId = allParts[i];
+                        String playerName = allParts[i + 1];
+                        int playerX = Integer.parseInt(allParts[i + 2]);  // x
+                        int playerY = Integer.parseInt(allParts[i + 3]);  // y
+                        String playerDir = allParts[i + 4];               // dir
+                        
+                        if (playerId.equals(this.id)) continue;  // Skip self
+                        
+                        OtherPlayer op = newPlayers.get(playerId);
+                        if (op == null) {
+                            op = new OtherPlayer(playerName);
+                            if (gameHandler != null && gameHandler.p1 != null) {
+                                // Copy sprites from local player
+                                op.up1 = gameHandler.p1.up1; op.up2 = gameHandler.p1.up2;
+                                op.down1 = gameHandler.p1.down1; op.down2 = gameHandler.p1.down2;
+                                op.left1 = gameHandler.p1.left1; op.left2 = gameHandler.p1.left2;
+                                op.right1 = gameHandler.p1.right1; op.right2 = gameHandler.p1.right2;
+                                op.idle1 = gameHandler.p1.idle1; op.idle2 = gameHandler.p1.idle2;
+                            }
+                        }
+                        op.entity_map_X = playerX;
+                        op.entity_map_Y = playerY;
+                        op.direction = playerDir;
+                        op.count++;  // For animation
+                        newPlayers.put(playerId, op);
+                        
+                    } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                        // Skip malformed player data - prevents crash
+                        System.err.println("Skipping malformed player data at index " + i + ": " + e.getMessage());
+                        continue;
+                    }
+                }
+                
+                // Update other players
+                if (gameHandler != null) {
+                    gameHandler.otherPlayers.clear();
+                    gameHandler.otherPlayers.putAll(newPlayers);
+                }
+                
+                // === PARSE PROJECTILES (everything AFTER PROJECTILES) ===
+                if (projIndex + 1 < allParts.length) {
+                    String projSection = allParts[projIndex + 1];  // "owner1,x1,y1,tx1,ty1;owner2,x2,y2,tx2,ty2;..."
+                    synchronized (gameHandler.clientProjectiles) {
+                        gameHandler.clientProjectiles.clear();
+                        if (!projSection.isEmpty()) {
+                            String[] projStrings = projSection.split(";");
+                            for (String projStr : projStrings) {
+                                if (projStr.trim().isEmpty()) continue;
+                                try {
+                                    String[] projParts = projStr.split(",");
+                                    if (projParts.length >= 5) {
+                                        String owner = projParts[0];
+                                        double sx = Double.parseDouble(projParts[1]);
+                                        double sy = Double.parseDouble(projParts[2]);
+                                        double tx = Double.parseDouble(projParts[3]);
+                                        double ty = Double.parseDouble(projParts[4]);
+                                        
+                                        Projectile proj = new Projectile(sx, sy, tx, ty, owner);
+                                        gameHandler.clientProjectiles.add(proj);
+                                    }
+                                } catch (NumberFormatException e) {
+                                    // Skip malformed projectile
+                                    System.err.println("Skipping malformed projectile: " + projStr);
+                                    continue;
+                                }
                             }
                         }
                     }
                 }
-                break;
-
-            case "WORLD":
-                // If gameHandler is not ready yet, ignore WORLD messages
-                if (gameHandler == null) {
-                    System.out.println("Received WORLD message too early - ignoring until game starts");
-                    break;
-                }
-
-                if (message.length() <= 6) break;
-                String data = message.substring(6);
-
-                // === Parse Players ===
-                HashMap<String, OtherPlayer> newPlayers = new HashMap<>();
-
-                if (!data.isEmpty()) {
-                    String[] playerParts = data.split("\\|");
-                    for (int i = 0; i < playerParts.length; i += 5) {
-                        if (i + 4 >= playerParts.length) break;
-
-                        String id = playerParts[i];
-                        String name = playerParts[i + 1];
-                        int x = Integer.parseInt(playerParts[i + 2]);
-                        int y = Integer.parseInt(playerParts[i + 3]);
-                        String dir = playerParts[i + 4];
-
-                        if (id.equals(this.id)) continue;
-
-                        OtherPlayer op = newPlayers.get(id);
-                        if (op == null) {
-                            op = new OtherPlayer(name);
-                            // Safe to copy sprites now — gameHandler.p1 exists
-                            op.up1 = gameHandler.p1.up1;    op.up2 = gameHandler.p1.up2;
-                            op.down1 = gameHandler.p1.down1;  op.down2 = gameHandler.p1.down2;
-                            op.left1 = gameHandler.p1.left1;  op.left2 = gameHandler.p1.left2;
-                            op.right1 = gameHandler.p1.right1; op.right2 = gameHandler.p1.right2;
-                            op.idle1 = gameHandler.p1.idle1;  op.idle2 = gameHandler.p1.idle2;
-                        }
-
-                        op.entity_map_X = x;
-                        op.entity_map_Y = y;
-                        op.direction = dir;
-                        op.count++;
-
-                        newPlayers.put(id, op);
-                    }
-                }
-
-                gameHandler.otherPlayers.clear();
-                gameHandler.otherPlayers.putAll(newPlayers);
                 break;
 
             case "LOGIN_SUCCESS":
