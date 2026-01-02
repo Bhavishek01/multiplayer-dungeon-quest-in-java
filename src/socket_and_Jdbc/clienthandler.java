@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+
 import java.util.Iterator;
 import main.PlayerRanking;  // Add at top
 
@@ -26,7 +28,7 @@ class ClientHandler implements Runnable {
     public List<PlayerItem> items = new ArrayList<>();
     private long lastFireTime = 0;
     private static final long SERVER_FIRE_COOLDOWN_MS = 250;
-    
+    boolean validSpawn = false;
 
     public int life = 5;  // NEW: Server-tracked life
     public int kills = 0;  // NEW: Server-tracked kills
@@ -182,6 +184,8 @@ class ClientHandler implements Runnable {
             this.kills = 0;  // Critical: Reset kills every new match!
             this.life = 5;   // Also reset life
 
+            spawnRandom();
+
             synchronized (globalChatHistory) 
             {
                 for (String histMsg : globalChatHistory) 
@@ -189,6 +193,7 @@ class ClientHandler implements Runnable {
                     out.println("CHAT_HISTORY|" + histMsg);
                 }
             }
+            broadcastWorld();
             return;
         }
 
@@ -345,8 +350,7 @@ class ClientHandler implements Runnable {
 
                         // Respawn the dead player
                         targetClient.life = 5;
-                        targetClient.x = 96;
-                        targetClient.y = 96;
+                        targetClient.spawnRandom();
                         targetClient.direction = "down";
 
                         // Tell everyone about respawn
@@ -489,6 +493,58 @@ class ClientHandler implements Runnable {
                 }
             }
             return null;
+        }
+
+        // Add this method to ClientHandler class (inside socket_and_Jdbc/ClientHandler.java)
+
+        private void spawnRandom() {
+            Random rand = new Random();
+            int attempts = 0;
+            final int MAX_ATTEMPTS = 200;  // Increased for safety with collision checks
+            
+            while (attempts < MAX_ATTEMPTS) {
+                int row = rand.nextInt(50);  // 0-49
+                int col = rand.nextInt(50);  // 0-49
+                
+                // Valid tile: NOT wall (ground=2 or water=3)
+                if (ServerTileMap.isWall(row, col)) {
+                    attempts++;
+                    continue;
+                }
+                
+                // Calculate center of tile
+                int newX = col * 48 + 24;
+                int newY = row * 48 + 24;
+                
+                // Check not too close to other players (min 3 tiles apart ~144 pixels)
+                boolean tooClose = false;
+                synchronized (allClients) {
+                    for (ClientHandler other : allClients) {
+                        if (other.playerId != null && other.GameEnter && other.playerId.equals(this.playerId)) continue;
+                        
+                        double dist = Math.hypot(newX - other.x, newY - other.y);
+                        if (dist < 96) {  // ~2 tiles apart minimum
+                            tooClose = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!tooClose) {
+                    // Valid spawn found!
+                    this.x = newX;
+                    this.y = newY;
+                    this.direction = "down";
+                    return;
+                }
+                
+                attempts++;
+            }
+            
+            // Fallback to safe spawn (center-ish, assuming valid)
+            this.x = 24 * 48 + 24;  // Tile 24,24
+            this.y = 24 * 48 + 24;
+            System.out.println(playerName + " used fallback spawn after " + attempts + " attempts");
         }
         
 }

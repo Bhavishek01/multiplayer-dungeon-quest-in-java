@@ -90,6 +90,9 @@ public class equipped
                 case 9: // light 
                     USing_light();
                     break;
+                case 10: // health 
+                    add_health();
+                    break;
             }
         }
     }
@@ -131,6 +134,7 @@ public class equipped
                 case 9: // light 
                     close_light();
                     break;
+                
 
             }
             found = true;
@@ -218,6 +222,9 @@ public class equipped
         gh.light_use = true;
     }
 
+    private void add_health(){
+
+    };
     // ==================== UNEQUIP METHODS ====================
     private void unequip_arrow()
     {

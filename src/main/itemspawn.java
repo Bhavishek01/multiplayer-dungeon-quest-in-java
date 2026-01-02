@@ -19,14 +19,11 @@ public class itemspawn {
 
     private void loadItemTypes() {
         try {
-            itemTypes[0] = new arrow();
             itemTypes[1] = new bow();
             itemTypes[2] = new bullet();
             itemTypes[3] = new gold_bullet();
-            itemTypes[4] = new golden_gun();
             itemTypes[5] = new shoe();
-            itemTypes[6] = new silver_gun();
-            itemTypes[7] = new sword();
+            itemTypes[9] = new life();
         } catch (IOException e) {
             e.printStackTrace();  // Handle image load failures
         }
@@ -35,7 +32,7 @@ public class itemspawn {
     private void spawnItems() {
         Random rand = new Random();
         if (gh.gameitems == null) {
-            gh.gameitems = new itemsdetail[10];  // Ensure array exists (add to gamehandler if not)
+            gh.gameitems = new itemsdetail[20];  // Ensure array exists (add to gamehandler if not)
         }
 
         for (int i = 0; i < gh.gameitems.length; i++) {
