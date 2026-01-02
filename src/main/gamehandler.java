@@ -77,6 +77,9 @@ public class gamehandler extends gamepannel implements Runnable
     private BufferedImage lightIcon;
     private BufferedImage swordIcon;
     
+    private long lastFireTime = 0;
+    private static final long FIRE_COOLDOWN_MS = 250; // 250ms delay = ~4 shots/sec. Adjust: 150ms=fast, 500ms=slow.
+
     Thread gameThread;
 
     public gamehandler(CardLayout cardlayout, JPanel cardpanel, gameclient gc) {
@@ -98,6 +101,11 @@ public class gamehandler extends gamepannel implements Runnable
             public void mousePressed(MouseEvent e) {
     if (e.getButton() != MouseEvent.BUTTON1 || ispaused || ischatting || isinventory_open) return;
 
+    long now = System.currentTimeMillis();
+            if (now - lastFireTime < FIRE_COOLDOWN_MS) {
+                return;  // Too soon - ignore
+            }
+            lastFireTime = now;
     int screenX = e.getX();
     int screenY = e.getY();
 

@@ -104,6 +104,37 @@ public class gameclient {
                     }
                 break;
 
+            case "HIT":
+            String shooterId = parts[1];
+            String victimId = parts[2];
+
+            // Only the victim applies damage to themselves
+            if (victimId.equals(this.id) && gameHandler != null) {
+                gameHandler.p1.life -= 1;
+                System.out.println("You were hit! Life left: " + gameHandler.p1.life);
+
+                // === ONLY WHEN YOU DIE → Tell server you died ===
+                if (gameHandler.p1.life <= 0) {
+                    gameHandler.p1.life = 5;  // Respawn with full life
+
+                    // Optional: respawn at random position (or wait for server to send one)
+                    // ... your respawn code here ...
+
+                    System.out.println("You DIED!");
+
+                    // Send death event to server so it can award the kill properly
+                    send("DEATH|" + shooterId);
+                }
+            }
+            break;
+
+            case "KILL_AWARD":
+                if (gameHandler != null) {
+                    gameHandler.p1.kills += 1;
+                    System.out.println("You got a KILL! Total kills: " + gameHandler.p1.kills);
+                }
+                break;
+
             case "WORLD":
                 if (message.length() <= 6) break;
                 String data = message.substring(6);  // Everything after "WORLD|"

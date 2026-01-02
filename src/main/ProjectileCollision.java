@@ -26,9 +26,9 @@ public class ProjectileCollision {
 
             // PLAYER HIT: Instant feel
             synchronized (gh.otherPlayers) {
-                if (checkPlayerCollisions(proj, gh.otherPlayers.values(), gh, it)) {
-                    continue;
-                }
+                // if (checkPlayerCollisions(proj, gh.otherPlayers.values(), gh, it)) {
+                //     continue;
+                // }
             }
         }
     }
@@ -43,9 +43,9 @@ public class ProjectileCollision {
             // NO WALL COLLISION CHECK — server handles it
             // Only check if it hits YOU (instant damage feel)
 
-            if (checkPlayerCollisions(proj, java.util.List.of(gh.p1), gh, it)) {
-                continue;
-            }
+            // if (checkPlayerCollisions(proj, java.util.List.of(gh.p1), gh, it)) {
+            //     continue;
+            // }
         }
     }
 }

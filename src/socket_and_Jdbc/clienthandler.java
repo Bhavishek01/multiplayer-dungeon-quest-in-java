@@ -22,6 +22,8 @@ class ClientHandler implements Runnable {
     private String direction = "down";
     private boolean GameEnter = false;
     public List<PlayerItem> items = new ArrayList<>();
+    private long lastFireTime = 0;
+    private static final long SERVER_FIRE_COOLDOWN_MS = 250;
 
     public static final List<ClientHandler> allClients = Collections.synchronizedList(new ArrayList<>());
     
@@ -47,9 +49,33 @@ class ClientHandler implements Runnable {
 
             String message;
             while ((message = in.readLine()) != null) {
+                String[] parts = message.split("\\|");
                 System.out.println(message);
                 if (playerId == null) {
                     handleLogin(message);
+                }
+                else if ("SHOOT".equals(parts[0])){
+                    
+                    double tx = Double.parseDouble(parts[1]);
+                    double ty = Double.parseDouble(parts[2]);
+
+                    long now = System.currentTimeMillis();
+                    if (now - lastFireTime < SERVER_FIRE_COOLDOWN_MS) {
+                        break; // Ignore spam
+                    }
+                    lastFireTime = now;
+
+                    // Use player's current position (center)
+                    double startX = this.x + 24;
+                    double startY = this.y + 24;
+
+                    Projectile proj = new Projectile(startX, startY, tx, ty, playerId);
+                    proj.id = ++projectileIdCounter;  // Assign unique ID
+
+                    synchronized (projectiles) {
+                        projectiles.add(proj);
+                    }
+                    // broadcastWorld() will handle sending it to everyone
                 }
                 else 
                 {
@@ -155,6 +181,23 @@ class ClientHandler implements Runnable {
             }
             return;
         }
+
+        else if ("DEATH".equals(parts[0])) {
+            String killerId = parts[1];
+
+            // Broadcast to everyone: "Player X killed Player Y"
+            // But more importantly: tell the killer they got a kill
+            synchronized (allClients) {
+                for (ClientHandler client : allClients) {
+                    if (client.playerId != null && client.playerId.equals(killerId)) {
+                        client.out.println("KILL_AWARD");  // Special message just for killer
+                        System.out.println("Kill awarded to " + killerId);
+                        break;
+                    }
+                }
+            }
+
+        }
         
         else if("ITEMS".equals(parts[0])) 
         {
@@ -168,26 +211,6 @@ class ClientHandler implements Runnable {
             }
    
         }
-
-        
-        else if ("SHOOT".equals(parts[0])){
-            double tx = Double.parseDouble(parts[1]);
-            double ty = Double.parseDouble(parts[2]);
-
-            // Use player's current position (center)
-            double startX = this.x + 24;
-            double startY = this.y + 24;
-
-            Projectile proj = new Projectile(startX, startY, tx, ty, playerId);
-            proj.id = ++projectileIdCounter;  // Assign unique ID
-
-            synchronized (projectiles) {
-                projectiles.add(proj);
-            }
-            // broadcastWorld() will handle sending it to everyone
-        }
-        
-
 
         else if ("CHAT".equals(parts[0]))
         {
@@ -218,34 +241,75 @@ class ClientHandler implements Runnable {
     private void broadcastWorld() {
     // === UPDATE ALL PROJECTILES + SERVER-SIDE WALL COLLISION ===
     synchronized (projectiles) {
-        Iterator<Projectile> it = projectiles.iterator();
-        while (it.hasNext()) {
-            Projectile p = it.next();
-            p.update();
+    Iterator<Projectile> it = projectiles.iterator();
+    while (it.hasNext()) {
+        Projectile p = it.next();
+        p.update();
 
-            // SERVER-SIDE TILE COLLISION CHECK
-            int col = (int) (p.x / 48);  // tile size = 48
+        boolean hitWall = false;
+
+            int col = (int) (p.x / 48);
             int row = (int) (p.y / 48);
 
-            boolean hitWall = false;
-
             // Out of bounds = wall
-            if (row < 0 || row >= 50 || col < 0 || col >= 50) {  // map is 50x50
+            if (row < 0 || row >= 50 || col < 0 || col >= 50) {
                 hitWall = true;
             } else {
-                // You need access to the map data here
-                // We'll use a simple static map loader (see below)
                 if (ServerTileMap.isWall(row, col)) {
                     hitWall = true;
                 }
             }
 
-            if (hitWall || !p.active) {
-                it.remove();  // Remove immediately — all clients will stop seeing it
-                continue;
-            }
+        // WALL COLLISION (already there)
+        if (hitWall || !p.active) {
+            it.remove();
+            continue;
+        }
+
+        // === NEW: SERVER-SIDE PLAYER HIT CHECK ===
+        boolean hitPlayer = false;
+        synchronized (allClients) {
+            for (ClientHandler targetClient : allClients) {
+                if (targetClient.playerId.equals(p.ownerId)) continue; // Don't hit self
+
+                // Player hitbox
+                int left = targetClient.x + 15;
+                int top = targetClient.y + 10;
+                int width = 18;
+                int height = 33;
+
+                // Bullet as small point or small box
+                if (p.x >= left && p.x <= left + width &&
+                    p.y >= top && p.y <= top + height) {
+
+                    // HIT!
+                    hitPlayer = true;
+
+                    // Broadcast hit/kill
+                    synchronized (allClients) {
+        for (ClientHandler client : allClients) {
+            try {
+                client.out.println("HIT|" + p.ownerId + "|" + targetClient.playerId);
+            } catch (Exception ignored) {}
         }
     }
+
+
+                    // Optional: Award kill if life would go to 0
+                    // You'd need to track life server-side, or let clients handle it
+
+                    break; // One hit per bullet
+                }
+            }
+        }
+
+        if (hitPlayer) {
+            it.remove(); // Remove bullet immediately
+        }
+    }
+}
+
+
 
     // === BUILD PLAYER DATA ===
     StringBuilder playerData = new StringBuilder();
