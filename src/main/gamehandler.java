@@ -70,7 +70,7 @@ public class gamehandler extends gamepannel implements Runnable
     public colisiondetection cd = new colisiondetection(this);
     public player p1 = new player(key,cd,this);
     public backgroundmanager bgm = new backgroundmanager(p1);
-    public itemsdetail gameitems[] = new itemsdetail[9];
+    public itemsdetail gameitems[] = new itemsdetail[11];
     public itemspawn itemspawn = new itemspawn(this);
     public environment_manager environmentManager = new environment_manager(this);
     BufferedImage projectileImage;

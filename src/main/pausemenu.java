@@ -94,6 +94,7 @@ public class pausemenu extends pausebackground implements ActionListener {
         save.setOpaque(false);
         save.setAlignmentX(Component.CENTER_ALIGNMENT);
         save.addActionListener(this);
+        save.setVisible(true);
         add(save);
 
         add(Box.createRigidArea(new Dimension(0, 20)));
@@ -131,7 +132,7 @@ public class pausemenu extends pausebackground implements ActionListener {
         }
         else if (e.getSource() == save) 
         {
-            gc.save_item();
+            // gc.save_item();
         }
     }
 

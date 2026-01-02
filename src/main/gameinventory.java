@@ -45,6 +45,8 @@ public class gameinventory extends inventory_background implements ActionListene
             itemCache.put(7, new silver_gun());
             itemCache.put(8, new sword());
             itemCache.put(9, new light());
+            itemCache.put(10, new life());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -97,7 +99,7 @@ public class gameinventory extends inventory_background implements ActionListene
         add(scrollPane, BorderLayout.CENTER);
 
         // ==================== BOTTOM: BACK BUTTON ====================
-        back = new JButton("Back to Game (Q or ESC)");
+        back = new JButton("Back ");
         back.setFont(new Font("Arial", Font.BOLD, 20));
         back.setPreferredSize(new Dimension(300, 50));
         back.addActionListener(this);

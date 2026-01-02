@@ -36,6 +36,7 @@ public class equipped
             itemCache.put(7, new silver_gun());
             itemCache.put(8, new sword());
             itemCache.put(9, new light());
+            itemCache.put(10, new life());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -223,6 +224,28 @@ public class equipped
     }
 
     private void add_health(){
+
+        if (gh.p1.life < 10) {
+        gh.p1.life += 1;
+    }
+
+    for (int i = 0; i < equippedItemIds.length; i++) {
+        if (equippedItemIds[i] == 10) {
+            equippedItemIds[i] = 0;  // Clear the slot
+
+            // Re-apply effects for remaining items
+            apply_effects();
+
+            // Update inventory UI if open
+            if (gh.gameinventory != null && gh.gameinventory.isVisible()) {
+                SwingUtilities.invokeLater(() -> gh.gameinventory.updateEquippedDisplay());
+            }
+
+            // Optional: Play sound or show "+1 Life!" popup
+            System.out.println("Health consumed! Life: " + gh.p1.life);
+            break;
+        }
+    }
 
     };
     // ==================== UNEQUIP METHODS ====================

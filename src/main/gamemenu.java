@@ -98,7 +98,7 @@ public class gamemenu extends loginphoto implements ActionListener {
 
         add(Box.createRigidArea(new Dimension(0, 20)));
 
-        exit = new JButton("Save & Exit");
+        exit = new JButton("Exit");
         exit.setFont(arial_40);
         exit.setBorderPainted(true);
         exit.setBackground(Color.BLACK);
@@ -145,7 +145,7 @@ public class gamemenu extends loginphoto implements ActionListener {
         }
         else if (e.getSource() == exit ) 
             {
-                gc.save_item();
+                // gc.save_item();
             
             System.exit(0);    
         }

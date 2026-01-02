@@ -8,7 +8,7 @@ import items.*;
 public class itemspawn {
     
     gamehandler gh;
-    itemsdetail[] itemTypes = new itemsdetail[8];  // Only 8 types available
+    itemsdetail[] itemTypes = new itemsdetail[11];  // Only 8 types available
 
     public itemspawn(gamehandler gh) 
     {
@@ -23,7 +23,7 @@ public class itemspawn {
             itemTypes[2] = new bullet();
             itemTypes[3] = new gold_bullet();
             itemTypes[5] = new shoe();
-            itemTypes[9] = new life();
+            itemTypes[10] = new life();
         } catch (IOException e) {
             e.printStackTrace();  // Handle image load failures
         }

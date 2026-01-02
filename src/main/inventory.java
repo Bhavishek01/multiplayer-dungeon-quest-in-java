@@ -44,6 +44,7 @@ public class inventory extends inventory_background implements ActionListener {
             itemCache.put(7, new silver_gun());
             itemCache.put(8, new sword());
             itemCache.put(9, new light());
+            itemCache.put(10, new life());
         } catch (IOException e) {
             e.printStackTrace();
         }
