@@ -108,6 +108,8 @@ public class gamemenu extends loginphoto implements ActionListener {
         exit.addActionListener(this);
         add(exit);
 
+        add(Box.createRigidArea(new Dimension(0, 20)));
+
         leaderboard = new JButton("Leaderboard");
         leaderboard.setFont(arial_30);
         leaderboard.setBackground(Color.BLACK);

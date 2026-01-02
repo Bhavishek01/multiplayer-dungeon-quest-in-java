@@ -19,11 +19,12 @@ public class itemspawn {
 
     private void loadItemTypes() {
         try {
-            itemTypes[1] = new bow();
+            itemTypes[1] = new arrow();
             itemTypes[2] = new bullet();
             itemTypes[3] = new gold_bullet();
-            itemTypes[5] = new shoe();
-            itemTypes[10] = new life();
+            itemTypes[4] = new shoe();
+            itemTypes[5] = new life();
+            itemTypes[6] = new bullet();
         } catch (IOException e) {
             e.printStackTrace();  // Handle image load failures
         }
@@ -32,20 +33,18 @@ public class itemspawn {
     private void spawnItems() {
         Random rand = new Random();
         if (gh.gameitems == null) {
-            gh.gameitems = new itemsdetail[20];  // Ensure array exists (add to gamehandler if not)
+            gh.gameitems = new itemsdetail[20];  
         }
 
         for (int i = 0; i < gh.gameitems.length; i++) {
-            // Pick random type from 0-7 (allow duplicates for variety)
             int randomTypeIndex = rand.nextInt(itemTypes.length);
-            if (itemTypes[randomTypeIndex] == null) continue;  // Skip if load failed
+            if (itemTypes[randomTypeIndex] == null) continue; 
 
-            // Clone the item type (to avoid sharing instances)
             gh.gameitems[i] = cloneItem(itemTypes[randomTypeIndex]);
 
             boolean placed = false;
             int attempts = 0;
-            int maxAttempts = 1000;  // Safety to prevent infinite loop
+            int maxAttempts = 1000; 
 
             while (!placed && attempts < maxAttempts) {
                 int row = rand.nextInt(gh.maprow);  // 0-49

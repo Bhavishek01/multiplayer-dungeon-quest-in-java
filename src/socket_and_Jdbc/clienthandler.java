@@ -331,7 +331,7 @@ class ClientHandler implements Runnable {
                             broadcast("KILLS|" + killer.playerId + "|" + killer.kills);
 
                             // === CHECK WIN CONDITION ===
-                            if (killer.kills >= 10) {
+                            if (killer.kills >= 5) {
                                 String winnerName = killer.playerName;
                                 String winnerId = killer.playerId;
 
