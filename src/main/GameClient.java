@@ -75,6 +75,8 @@ public class gameclient {
 
         if (parts.length == 0) return;
 
+        
+
         switch (parts[0]) {
 
             case "ITEMS":
@@ -165,40 +167,47 @@ public class gameclient {
                 
                 // Update other players
                 if (gameHandler != null) {
-                    gameHandler.otherPlayers.clear();
-                    gameHandler.otherPlayers.putAll(newPlayers);
-                }
+    synchronized (gameHandler.otherPlayers) {
+        gameHandler.otherPlayers.clear();
+        gameHandler.otherPlayers.putAll(newPlayers);
+    }
+}
                 
                 // === PARSE PROJECTILES (everything AFTER PROJECTILES) ===
-                if (projIndex + 1 < allParts.length) {
-                    String projSection = allParts[projIndex + 1];  // "owner1,x1,y1,tx1,ty1;owner2,x2,y2,tx2,ty2;..."
-                    synchronized (gameHandler.clientProjectiles) {
-                        gameHandler.clientProjectiles.clear();
-                        if (!projSection.isEmpty()) {
-                            String[] projStrings = projSection.split(";");
-                            for (String projStr : projStrings) {
-                                if (projStr.trim().isEmpty()) continue;
-                                try {
-                                    String[] projParts = projStr.split(",");
-                                    if (projParts.length >= 5) {
-                                        String owner = projParts[0];
-                                        double sx = Double.parseDouble(projParts[1]);
-                                        double sy = Double.parseDouble(projParts[2]);
-                                        double tx = Double.parseDouble(projParts[3]);
-                                        double ty = Double.parseDouble(projParts[4]);
-                                        
-                                        Projectile proj = new Projectile(sx, sy, tx, ty, owner);
-                                        gameHandler.clientProjectiles.add(proj);
-                                    }
-                                } catch (NumberFormatException e) {
-                                    // Skip malformed projectile
-                                    System.err.println("Skipping malformed projectile: " + projStr);
-                                    continue;
-                                }
-                            }
-                        }
-                    }
+synchronized (gameHandler.clientProjectiles) {
+    gameHandler.clientProjectiles.clear();
+
+    if (projIndex != -1 && projIndex + 1 < allParts.length) {
+        // All parts from projIndex + 1 onward are projectile strings
+        for (int i = projIndex + 1; i < allParts.length; i++) {
+            String projStr = allParts[i].trim();
+            if (projStr.isEmpty()) continue;
+
+            try {
+                String[] projParts = projStr.split(";");
+                if (projParts.length >= 6) {
+                    long id = Long.parseLong(projParts[0]); // if you use id
+                    String owner = projParts[1];
+                    double x = Double.parseDouble(projParts[2]);
+                    double y = Double.parseDouble(projParts[3]);
+                    double tx = Double.parseDouble(projParts[4]);
+                    double ty = Double.parseDouble(projParts[5]);
+
+                    // Skip if it's your own projectile (already in localProjectiles)
+                    if (owner.equals(this.id)) continue;
+
+                    Projectile proj = new Projectile(x, y, tx, ty, owner);
+                    // proj.id = id; // optional, if you track by id
+
+                    gameHandler.clientProjectiles.add(proj);
                 }
+            } catch (Exception e) {
+                System.err.println("Failed to parse projectile: " + projStr + " | " + e.getMessage());
+            }
+        }
+    }
+}
+                
                 break;
 
             case "LOGIN_SUCCESS":
@@ -259,13 +268,11 @@ public class gameclient {
     public void save_item() 
     {
         StringBuilder itemMsg = new StringBuilder("ITEMS");
-            for (PlayerItem item : Items) 
-            {
-                itemMsg.append("|").append(item.id)
-                .append("|").append(item.quantity);
-
-                
+        for (PlayerItem item : Items) {
+            if (item.quantity > 0) {
+                itemMsg.append("|").append(item.id).append("|").append(item.quantity);
             }
-            out.println(itemMsg.toString());
+        }
+        out.println(itemMsg.toString());
     }
 }

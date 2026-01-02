@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
 
 
@@ -52,45 +50,6 @@ class ClientHandler implements Runnable {
                 System.out.println(message);
                 if (playerId == null) {
                     handleLogin(message);
-                }
-                else if (message.startsWith("SHOOT|")) {
-                    if (playerId == null || !GameEnter) continue;
-
-                    String[] parts = message.substring(6).split("\\|");
-                    if (parts.length != 2) continue;
-
-                    try {
-                        double targetX = Double.parseDouble(parts[0]);
-                        double targetY = Double.parseDouble(parts[1]);
-
-                        // Validate distance
-                        double dx = targetX - x;
-                        double dy = targetY - y;
-                        double dist = Math.hypot(dx, dy);
-                        if (dist < 50 || dist > 500) continue;
-
-                        // Start from player center
-                        double startX = x + 24;
-                        double startY = y + 24;
-
-                        // Build one-time creation message
-                        String projMsg = "PROJECTILE|" + playerId + "|" + 
-                                        (int)startX + "|" + (int)startY + "|" + 
-                                        (int)targetX + "|" + (int)targetY;
-
-                        // Broadcast to ALL clients (including shooter)
-                        synchronized (allClients) {
-                            for (ClientHandler client : allClients) {
-                                try {
-                                    client.out.println(projMsg);
-                                } catch (Exception ignored) {}
-                            }
-                        }
-
-                        System.out.println(playerName + " shot projectile to (" + targetX + "," + targetY + ")");
-
-                    } catch (Exception ignored) {}
-                    continue;
                 }
                 else 
                 {
@@ -214,24 +173,20 @@ class ClientHandler implements Runnable {
         else if ("SHOOT".equals(parts[0])){
             double tx = Double.parseDouble(parts[1]);
             double ty = Double.parseDouble(parts[2]);
-            Projectile proj = new Projectile(this.x, this.y, tx, ty, playerId);
+
+            // Use player's current position (center)
+            double startX = this.x + 24;
+            double startY = this.y + 24;
+
+            Projectile proj = new Projectile(startX, startY, tx, ty, playerId);
+            proj.id = ++projectileIdCounter;  // Assign unique ID
+
             synchronized (projectiles) {
                 projectiles.add(proj);
             }
-
-        // Server update loop (every tick):
-        synchronized (projectiles) {
-            Iterator<Projectile> it = projectiles.iterator();
-            while (it.hasNext()) {
-                Projectile p = it.next();
-                p.update();
-                if (!p.active) {
-                    it.remove();
-                }
-                // Optional: server-side collisions here too
-            }
+            // broadcastWorld() will handle sending it to everyone
         }
-    }
+        
 
 
         else if ("CHAT".equals(parts[0]))
@@ -261,57 +216,76 @@ class ClientHandler implements Runnable {
         
 
     private void broadcastWorld() {
-        // === UPDATE ALL PROJECTILES FIRST ===
-        synchronized (projectiles) {
-            Iterator<Projectile> it = projectiles.iterator();
-            while (it.hasNext()) {
-                Projectile p = it.next();
-                p.update();
-                if (!p.active) {
-                    it.remove();
-                }
-            }
-        }
+    // === UPDATE ALL PROJECTILES + SERVER-SIDE WALL COLLISION ===
+    synchronized (projectiles) {
+        Iterator<Projectile> it = projectiles.iterator();
+        while (it.hasNext()) {
+            Projectile p = it.next();
+            p.update();
 
-        // === BUILD PLAYER DATA ===
-        StringBuilder playerData = new StringBuilder();
-        synchronized (allClients) {
-            for (ClientHandler client : allClients) {
-                if (client.playerId != null) {
-                    playerData.append(client.playerId).append("|")
-                            .append(client.playerName).append("|")
-                            .append(client.x).append("|")  // Use int or (int)client.x if double
-                            .append(client.y).append("|")
-                            .append(client.direction).append("|");
+            // SERVER-SIDE TILE COLLISION CHECK
+            int col = (int) (p.x / 48);  // tile size = 48
+            int row = (int) (p.y / 48);
+
+            boolean hitWall = false;
+
+            // Out of bounds = wall
+            if (row < 0 || row >= 50 || col < 0 || col >= 50) {  // map is 50x50
+                hitWall = true;
+            } else {
+                // You need access to the map data here
+                // We'll use a simple static map loader (see below)
+                if (ServerTileMap.isWall(row, col)) {
+                    hitWall = true;
                 }
             }
-        }
-        
-        // === BUILD PROJECTILE DATA ===
-        StringBuilder projData = new StringBuilder();
-        synchronized (projectiles) {
-            for (Projectile p : projectiles) {
-                if (p.active) {
-                    projData.append(p.ownerId).append(",")
-                        .append((int)p.x).append(",")
-                        .append((int)p.y).append(",")
-                        .append((int)p.targetX).append(",")
-                        .append((int)p.targetY).append(";");
-                }
-            }
-        }
-        
-        // === BROADCAST ===
-        String worldMsg = "WORLD|" + playerData.toString() + "PROJECTILES|" + projData.toString();
-        
-        synchronized (allClients) {
-            for (ClientHandler client : allClients) {
-                try {
-                    client.out.println(worldMsg);
-                } catch (Exception ignored) {}
+
+            if (hitWall || !p.active) {
+                it.remove();  // Remove immediately — all clients will stop seeing it
+                continue;
             }
         }
     }
+
+    // === BUILD PLAYER DATA ===
+    StringBuilder playerData = new StringBuilder();
+    synchronized (allClients) {
+        for (ClientHandler client : allClients) {
+            if (client.playerId != null) {
+                playerData.append(client.playerId).append("|")
+                        .append(client.playerName).append("|")
+                        .append(client.x).append("|")
+                        .append(client.y).append("|")
+                        .append(client.direction).append("|");
+            }
+        }
+    }
+    
+    // === BUILD PROJECTILE DATA ===
+    StringBuilder projData = new StringBuilder();
+    synchronized (projectiles) {
+        for (Projectile p : projectiles) {
+            if (p.active) {
+                projData.append("|").append(p.id).append(";")
+                        .append(p.ownerId).append(";")
+                        .append((int)p.x).append(";")
+                        .append((int)p.y).append(";")
+                        .append((int)p.targetX).append(";")
+                        .append((int)p.targetY);
+            }
+        }
+    }
+    
+    // === BROADCAST ===
+    String worldMsg = "WORLD|" + playerData.toString() + "PROJECTILES|" + projData.toString();
+    synchronized (allClients) {
+        for (ClientHandler client : allClients) {
+            try {
+                client.out.println(worldMsg);
+            } catch (Exception ignored) {}
+        }
+    }
+}
 
     private void logout() 
     {
@@ -322,6 +296,39 @@ class ClientHandler implements Runnable {
         }
         try { socket.close(); } catch (Exception ignored) {}
     }
+
+    class ServerTileMap {
+    private static final int[][] map = new int[50][50];  // 50x50 map
+    private static final int TILE_SIZE = 48;
+
+    static {
+        loadMap();
+    }
+
+    private static void loadMap() {
+        try (BufferedReader br = new BufferedReader(new FileReader("resource/50x40.txt"))) {  // your map file
+            for (int row = 0; row < 50; row++) {
+                String line = br.readLine();
+                if (line == null) break;
+                String[] tokens = line.trim().split("\\s+");
+                for (int col = 0; col < tokens.length && col < 50; col++) {
+                    map[row][col] = Integer.parseInt(tokens[col]);
+                }
+            }
+            System.out.println("Server map loaded successfully.");
+        } catch (Exception e) {
+            System.err.println("Failed to load server map: " + e.getMessage());
+            e.printStackTrace();
+            // Fallback: treat everything as ground
+        }
+    }
+
+    public static boolean isWall(int row, int col) {
+        if (row < 0 || row >= 50 || col < 0 || col >= 50) return true;
+        int tile = map[row][col];
+        return tile == 0 || tile == 1;  // 0 = wall, 1 = stone (adjust if needed)
+    }
+}
 
    private void send_inventory() 
         {

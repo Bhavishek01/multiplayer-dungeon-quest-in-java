@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class gamehandler extends gamepannel implements Runnable
 
 
     public gameclient gc;
-    public Map<String, OtherPlayer> otherPlayers = new HashMap<>();
+    public final Map<String, OtherPlayer> otherPlayers = Collections.synchronizedMap(new HashMap<>());
 
     public volatile boolean ispaused = false;  // VOLATILE for thread safet
     public volatile boolean resumed = false; 
@@ -73,6 +74,8 @@ public class gamehandler extends gamepannel implements Runnable
     public itemspawn itemspawn = new itemspawn(this);
     public environment_manager environmentManager = new environment_manager(this);
     BufferedImage projectileImage;
+    private BufferedImage lightIcon;
+    private BufferedImage swordIcon;
     
     Thread gameThread;
 
@@ -93,30 +96,57 @@ public class gamehandler extends gamepannel implements Runnable
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (e.getButton() != MouseEvent.BUTTON1 || ispaused || ischatting || isinventory_open) return;
+    if (e.getButton() != MouseEvent.BUTTON1 || ispaused || ischatting || isinventory_open) return;
 
-                int screenX = e.getX();
-                int screenY = e.getY();
+    int screenX = e.getX();
+    int screenY = e.getY();
 
-                double worldX = p1.entity_map_X + screenX - p1.centerx;
-                double worldY = p1.entity_map_Y + screenY - p1.centery;
+    double worldX = p1.entity_map_X + screenX - p1.centerx;
+    double worldY = p1.entity_map_Y + screenY - p1.centery;
 
-                // Snap to tile center (optional - remove for free aim)
-                // worldX = Math.round(worldX / tiles) * tiles + tiles / 2.0;
-                // worldY = Math.round(worldY / tiles) * tiles + tiles / 2.0;
+    // FIXED: Check weapon equipped + ammo in INVENTORY (qty > 0), deduct on shoot
+    int shootAmmoId = -1;
+    if (equipmentManager.isItemEquipped(7)) {  // Silver gun
+        shootAmmoId = 3;  // Bullet
+    } else if (equipmentManager.isItemEquipped(5)) {  // Golden gun
+        shootAmmoId = 4;  // Gold bullet
+    } else if (equipmentManager.isItemEquipped(2)) {  // Bow (bonus support)
+        shootAmmoId = 1;  // Arrow
+    }
 
-                double startX = p1.entity_map_X + 24; // Player center
-                double startY = p1.entity_map_Y + 24;
+    if (shootAmmoId == -1) {
+        return;  // No compatible weapon equipped
+    }
 
-                // Create LOCAL projectile for instant feedback
-                Projectile localProj = new Projectile(startX, startY, worldX, worldY, gc.id);
-                synchronized (localProjectiles) {
-                    localProjectiles.add(localProj);
-                }
-
-                // Send to server (target only - server uses your last known pos)
-                gc.send("SHOOT|" + worldX + "|" + worldY);
+    // Check & deduct local ammo (predictive)
+    boolean hasAmmo = false;
+    Iterator<PlayerItem> it = gc.Items.iterator();
+    while (it.hasNext()) {
+        PlayerItem pi = it.next();
+        if (pi.id == shootAmmoId && pi.quantity > 0) {
+            pi.quantity--;
+            if (pi.quantity <= 0) {
+                it.remove();
             }
+            hasAmmo = true;
+            break;
+        }
+    }
+    if (!hasAmmo) {
+        return;  // No ammo
+    }
+
+    double startX = p1.entity_map_X + 24; // Player center
+    double startY = p1.entity_map_Y + 24;
+
+    // Create LOCAL projectile for instant feedback
+    Projectile localProj = new Projectile(startX, startY, worldX, worldY, gc.id);
+    localProjectiles.add(localProj);
+
+    // Send to server WITH ammo ID for validation/persistence
+    gc.send("SHOOT|" + worldX + "|" + worldY + "|" + shootAmmoId);
+}
+
         });
         
         this.setFocusable(true);  // NEW
@@ -124,8 +154,10 @@ public class gamehandler extends gamepannel implements Runnable
 
         try 
         {
-            projectileImage = ImageIO.read(new File("resource/object/bigrock.png"));
+            projectileImage = ImageIO.read(new File("resource/items/fireball.png"));
             shoeHudIcon = ImageIO.read(new File("resource/items/fast_shoe.png"));
+            lightIcon = ImageIO.read(new File("resource/items/life.png"));
+            swordIcon = ImageIO.read(new File("resource/items/kill.png"));
         } catch (IOException e) {
             e.printStackTrace();
             shoeHudIcon = null;
@@ -178,34 +210,38 @@ public class gamehandler extends gamepannel implements Runnable
                 gameinventory.requestFocusInWindow(); 
             }
 
-            else if (!ispaused && !ischatting && !isinventory_open) {
+             synchronized (localProjectiles) {
+                Iterator<Projectile> it = localProjectiles.iterator();
+                while (it.hasNext()) {
+                    Projectile p = it.next();
+                    p.update();
+                    if (!p.active) {
+                        it.remove();
+                    }
+                }
+            }
+
+            // Update remote projectiles (others' shots)
+            synchronized (clientProjectiles) {
+                Iterator<Projectile> it = clientProjectiles.iterator();
+                while (it.hasNext()) {
+                    Projectile p = it.next();
+                    p.update();
+                    if (!p.active) {
+                        it.remove();
+                    }
+                }
+            }
+
+            // Always check collisions
+            ProjectileCollision.checkCollisions(this);
+
+            // Always repaint (so projectiles keep moving even if player is idle)
+            repaint();
+
+            if (!ispaused && !ischatting && !isinventory_open) {
                 p1.update();
-                // Update LOCAL projectiles (your shots)
-                synchronized (localProjectiles) {
-                    Iterator<Projectile> it = localProjectiles.iterator();
-                    while (it.hasNext()) {
-                        Projectile p = it.next();
-                        p.update();
-                        if (!p.active) {
-                            it.remove();
-                        }
-                    }
-                }
-
-                // Update CLIENT projectiles (others' shots from server)
-                synchronized (clientProjectiles) {
-                    Iterator<Projectile> it = clientProjectiles.iterator();
-                    while (it.hasNext()) {
-                        Projectile p = it.next();
-                        p.update();
-                        if (!p.active) {
-                            it.remove();
-                        }
-                    }
-                }
-
-                ProjectileCollision.checkCollisions(this);
-                repaint();
+                
             }
             // NOTE: If you have multiplayer network updates (e.g., gc.pollServer()), add them here outside the if(!ispaused) so they continue in background.
 
@@ -241,13 +277,16 @@ public class gamehandler extends gamepannel implements Runnable
         }
 
         // 2. Draw ALL other players (they appear behind you)
+        synchronized (otherPlayers){
         for (OtherPlayer op : otherPlayers.values()) {
             int screenX = op.entity_map_X - p1.entity_map_X + p1.centerx;
             int screenY = op.entity_map_Y - p1.entity_map_Y + p1.centery;
             op.draw(g2, screenX, screenY);
         }
+    }
         // 3. Draw local player ON TOP
         p1.draw(g2);
+    
 
         if(light_on && !light_use)
         {
@@ -279,6 +318,26 @@ public class gamehandler extends gamepannel implements Runnable
                 }
             }
         }
+
+        // === STATS HUD (Top-Left) ===
+        g2.setColor(new Color(0, 0, 0, 180)); // Semi-transparent black background for the box
+        g2.fillRoundRect(10, 10, 110, 65, 20, 20);
+
+        // Slot 1: Light (Life)
+        if (lightIcon != null) {
+            g2.drawImage(lightIcon, 10, 10, 48, 48, null);
+        }
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Arial", Font.BOLD, 16));
+        g2.drawString("" + p1.life, 55, 60);
+
+        // Slot 2: Sword (Kills)
+        if (swordIcon != null) {
+            g2.drawImage(swordIcon, 62, 10, 48, 48, null);
+        }
+        g2.drawString("" + p1.kills, 98, 60);
+
+
 
         // ==================== EQUIPPED ITEMS HUD (Top-Right) ====================
     int hudX = base - 210;        // Adjust if needed
@@ -396,4 +455,3 @@ public class gamehandler extends gamepannel implements Runnable
             otherPlayers.putAll(newPlayers);
     }
 }
-

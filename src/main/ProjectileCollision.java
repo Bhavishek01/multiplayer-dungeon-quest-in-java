@@ -3,64 +3,59 @@ package main;
 import java.awt.Rectangle;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Random;
 
 import gameplayers.entity;
 import gameplayers.OtherPlayer;
-import gameplayers.player;
 
 public class ProjectileCollision {
 
-    /**
-     * Main method to check all projectile collisions.
-     * - Local projectiles: vs tiles and other players
-     * - Client projectiles: vs tiles and self (for instant hit feedback)
-     */
     public static void checkCollisions(gamehandler gh) {
-        // Local projectiles (your shots) - collide with map and other players
-        synchronized (gh.localProjectiles) {
-            Iterator<Projectile> it = gh.localProjectiles.iterator();
-            while (it.hasNext()) {
-                Projectile proj = it.next();
-                if (!proj.active) continue;
+    // === LOCAL PROJECTILES (your shots) — full client prediction ===
+    synchronized (gh.localProjectiles) {
+        Iterator<Projectile> it = gh.localProjectiles.iterator();
+        while (it.hasNext()) {
+            Projectile proj = it.next();
+            if (!proj.active) continue;
 
-                // Check tile collision (wall/stone)
-                if (checkTileCollision(proj.x, proj.y, gh)) {
-                    proj.active = false;
-                    continue;
-                }
-
-                // Check collision with other players
-                checkPlayerCollisions(proj, gh.otherPlayers.values(), gh);
+            // WALL: Instant removal for shooter feedback
+            if (checkTileCollision(proj.x, proj.y, gh)) {
+                it.remove();
+                continue;
             }
-        }
 
-        // Client projectiles (other players' shots) - collide with map and self
-        synchronized (gh.clientProjectiles) {
-            for (Projectile proj : gh.clientProjectiles) {
-                if (!proj.active) continue;
-
-                // Check tile collision (wall/stone)
-                if (checkTileCollision(proj.x, proj.y, gh)) {
-                    proj.active = false;
+            // PLAYER HIT: Instant feel
+            synchronized (gh.otherPlayers) {
+                if (checkPlayerCollisions(proj, gh.otherPlayers.values(), gh, it)) {
                     continue;
                 }
-
-                // Check collision with self only
-                checkPlayerCollisions(proj, java.util.List.of(gh.p1), gh);
             }
         }
     }
 
-    /**
-     * Checks if projectile hits a wall (0) or stone (1) tile.
-     */
+    // === REMOTE PROJECTILES (others' shots) — server authoritative ===
+    synchronized (gh.clientProjectiles) {
+        Iterator<Projectile> it = gh.clientProjectiles.iterator();
+        while (it.hasNext()) {
+            Projectile proj = it.next();
+            if (!proj.active) continue;
+
+            // NO WALL COLLISION CHECK — server handles it
+            // Only check if it hits YOU (instant damage feel)
+
+            if (checkPlayerCollisions(proj, java.util.List.of(gh.p1), gh, it)) {
+                continue;
+            }
+        }
+    }
+}
+
     private static boolean checkTileCollision(double worldX, double worldY, gamehandler gh) {
         int col = (int) (worldX / gh.tiles);
         int row = (int) (worldY / gh.tiles);
 
-        // Out of bounds = wall
         if (row < 0 || row >= gh.maprow || col < 0 || col >= gh.mapcol) {
-            return true;
+            return true; // Out of bounds = wall
         }
 
         int tileType = gh.bgm.Maprowcol[row][col];
@@ -68,10 +63,14 @@ public class ProjectileCollision {
     }
 
     /**
-     * Checks projectile collision with given player targets.
-     * On hit: damage player, deactivate proj, handle death/kills/respawn.
+     * Returns true if projectile hit a player and was removed
      */
-    private static void checkPlayerCollisions(Projectile proj, Collection<? extends entity> targets, gamehandler gh) {
+    private static boolean checkPlayerCollisions(
+            Projectile proj,
+            Collection<? extends entity> targets,
+            gamehandler gh,
+            Iterator<Projectile> iterator) {  // Pass the iterator!
+
         Rectangle projRect = new Rectangle((int) proj.x - 6, (int) proj.y - 6, 12, 12);
 
         for (entity target : targets) {
@@ -83,34 +82,52 @@ public class ProjectileCollision {
             );
 
             if (projRect.intersects(targetRect)) {
-                // Hit!
+                // HIT!
                 target.life -= 1;
-                proj.active = false;
+
+                // IMMEDIATELY REMOVE using the iterator (safe & clean)
+                iterator.remove();
 
                 if (target.life <= 0) {
-                    // Death: respawn
+                    // Respawn
                     target.life = 5;
-                    target.entity_map_X = 96;
-                    target.entity_map_Y = 96;
                     target.direction = "down";
 
-                    // Award kill to shooter
-                    String killerId = proj.ownerId;
-                    entity killer = null;
-                    if (killerId.equals(gh.gc.id)) {
-                        killer = gh.p1;
-                    } else {
-                        OtherPlayer killerOp = gh.otherPlayers.get(killerId);
-                        if (killerOp != null) {
-                            killer = killerOp;
+                    Random rand = new Random();
+                    boolean validSpawn = false;
+                    int attempts = 0;
+                    final int maxAttempts = 100;
+
+                    while (!validSpawn && attempts < maxAttempts) {
+                        int tileX = rand.nextInt(48) + 1;
+                        int tileY = rand.nextInt(48) + 1;
+                        int mapValue = gh.bgm.Maprowcol[tileY][tileX];
+                        if (mapValue == 2) { // Ground
+                            target.entity_map_X = tileX * gh.tiles;
+                            target.entity_map_Y = tileY * gh.tiles;
+                            validSpawn = true;
                         }
+                        attempts++;
                     }
+
+                    if (!validSpawn) {
+                        target.entity_map_X = 96;
+                        target.entity_map_Y = 96;
+                    }
+
+                    // Award kill
+                    String killerId = proj.ownerId;
+                    entity killer = killerId.equals(gh.gc.id) ? gh.p1 : gh.otherPlayers.get(killerId);
+
                     if (killer != null) {
                         killer.kills += 1;
+                        System.out.println("Kill awarded to " + killerId + " | Total kills: " + killer.kills);
                     }
                 }
-                return; // One hit per projectile
+
+                return true; // Projectile removed
             }
         }
+        return false; // No hit
     }
 }
