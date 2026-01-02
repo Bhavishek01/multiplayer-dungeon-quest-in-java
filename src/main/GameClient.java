@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
 import gameplayers.OtherPlayer;
 
 
@@ -26,6 +29,8 @@ public class gameclient {
     public boolean connection = false;
     public Map<String, OtherPlayer> otherPlayers = new ConcurrentHashMap<>();
     public gamehandler gameHandler;
+
+    public java.util.List<PlayerRanking> topPlayers;
     
     public List<PlayerItem> Items = new ArrayList<>();
     
@@ -127,6 +132,16 @@ public class gameclient {
                 }
             }
             break;
+
+            case "LEADERBOARD":
+                topPlayers = new java.util.ArrayList<>();
+                for (int i = 1; i < parts.length; i++) {
+                    String[] p = parts[i].split(":");
+                    if (p.length == 3) {
+                        topPlayers.add(new PlayerRanking(p[0], p[1], Integer.parseInt(p[2])));
+                    }
+                }
+                break;
 
             case "KILL_AWARD":
                 if (gameHandler != null) {
@@ -268,6 +283,77 @@ synchronized (gameHandler.clientProjectiles) {
 
             case "ERROR":
                 break;
+
+            case "HEALTH":
+                if (parts.length >= 3) {
+                    String pid = parts[1];
+                    int newLife = Integer.parseInt(parts[2]);
+                    if (pid.equals(id) && gameHandler != null) {
+                        gameHandler.p1.life = newLife;
+                    } else {
+                        OtherPlayer op = otherPlayers.get(pid);
+                        if (op != null) op.life = newLife;
+                    }
+                }
+                break;
+
+            case "KILLS":
+                if (parts.length >= 3) {
+                    String pid = parts[1];
+                    int newKills = Integer.parseInt(parts[2]);
+                    if (pid.equals(id) && gameHandler != null) {
+                        gameHandler.p1.kills = newKills;
+                    } else {
+                        OtherPlayer op = otherPlayers.get(pid);
+                        if (op != null) op.kills = newKills;
+                    }
+                }
+                break;
+
+            case "RESPAWN":
+                if (parts.length >= 5 && gameHandler != null) {
+                    String targetId = parts[1];
+                    int nx = Integer.parseInt(parts[2]);
+                    int ny = Integer.parseInt(parts[3]);
+                    String dir = parts[4];
+
+                    if (targetId.equals(id)) {
+                        gameHandler.p1.entity_map_X = nx;
+                        gameHandler.p1.entity_map_Y = ny;
+                        gameHandler.p1.direction = dir;
+                        gameHandler.p1.life = 5;
+                    } else {
+                        OtherPlayer op = otherPlayers.get(targetId);
+                        if (op != null) {
+                            op.entity_map_X = nx;
+                            op.entity_map_Y = ny;
+                            op.direction = dir;
+                            op.life = 5;
+                        }
+                    }
+                }
+                break;
+
+            case "GAMEOVER":
+                if (parts.length >= 3 && gameHandler != null) {
+                    String winnerId = parts[1];
+                    String winnerName = parts[2];
+
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(
+                            gameHandler,
+                            "GAME OVER!\nWinner: " + winnerName + " with 10 kills!",
+                            "Match Ended",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+
+                        // Kick everyone back to main menu
+                        gameHandler.stopGame();
+                        gameHandler.cardLayout.show(gameHandler.cardPanel, "gamemenu");
+                    });
+                }
+                break;
+
 
             default:
                 System.out.println("Server: " + message);

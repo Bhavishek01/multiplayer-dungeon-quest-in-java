@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import main.PlayerRanking;
+
 
 public class playercheck {
     private static Connection conn = DatabaseConnection.getConnection();
@@ -55,28 +57,76 @@ public class playercheck {
     }
     }
 
-    public void addplayer(String name, String id) throws SQLException {
-    System.out.println("adding player");
-    String query = "INSERT INTO players (player_id, player_name) VALUES (?, ?)";
-
-    try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-        pstmt.setString(1, id);
-        pstmt.setString(2, name);
-
-        System.out.println("Executing INSERT for player: " + id + " - " + name);
-        int rowsAffected = pstmt.executeUpdate();
-        System.out.println("Rows inserted: " + rowsAffected);
-
-        if (rowsAffected > 0) {
-            System.out.println("Player added successfully!");
-        } else {
-            System.out.println("Insert failed - no rows affected");
+    public int getPlayerWins(String playerId) throws SQLException {
+        String query = "SELECT wins FROM players WHERE player_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, playerId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next() ? rs.getInt("wins") : 0;
+            }
         }
-    } catch (SQLException e) {
-        System.err.println("SQL Error in addplayer:");
-        e.printStackTrace();
-        throw e;
     }
+
+    public void updateWins(String playerId, int wins) throws SQLException {
+        String query = "UPDATE players SET wins = ? WHERE player_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, wins);
+            pstmt.setString(2, playerId);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public String getNameById(String id) throws SQLException {
+            String query = "SELECT player_name FROM players WHERE player_id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, id);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("player_name");
+                    }
+                }
+            }
+            return null;
+        }
+
+        public void addPlayer(String id, String name) throws SQLException {
+            String sql = "INSERT INTO players (player_id, player_name, wins,kills) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE player_name = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, id);
+                ps.setString(2, name);
+                ps.setInt(3, 0);
+                ps.executeUpdate();
+            }
+        }
+
+        public void incrementWins(String playerId) throws SQLException {
+    String sql = "UPDATE players SET wins = wins + 1 WHERE player_id = ?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, playerId);
+        ps.executeUpdate();
+    }
+}
+
+        public List<PlayerRanking> getTopPlayers(int limit) throws SQLException {
+    List<PlayerRanking> top = new ArrayList<>();
+    String sql = "SELECT player_id, player_name, wins FROM players ORDER BY wins DESC LIMIT ?";
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, limit);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                top.add(new PlayerRanking(
+                    rs.getString("player_id"),
+                    rs.getString("player_name"),
+                    rs.getInt("wins")
+                    // rs.getInt("kills")
+                    
+                )
+            );
+            }
+        }
+    }
+    return top;
+    
 }
 
     public String giveplayername(String id) throws SQLException {

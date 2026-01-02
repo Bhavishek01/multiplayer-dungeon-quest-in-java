@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Iterator;
+import main.PlayerRanking;  // Add at top
 
 
 class ClientHandler implements Runnable {
@@ -15,6 +16,7 @@ class ClientHandler implements Runnable {
     private PrintWriter out;
     private BufferedReader in;
     public playercheck checker = new playercheck();
+    private List<PlayerRanking> top;  // Now uses main.PlayerRanking
 
     public String playerId = null;
     private String playerName = null;
@@ -24,8 +26,13 @@ class ClientHandler implements Runnable {
     public List<PlayerItem> items = new ArrayList<>();
     private long lastFireTime = 0;
     private static final long SERVER_FIRE_COOLDOWN_MS = 250;
+    
+
+    public int life = 5;  // NEW: Server-tracked life
+    public int kills = 0;  // NEW: Server-tracked kills
 
     public static final List<ClientHandler> allClients = Collections.synchronizedList(new ArrayList<>());
+
     
     public static final List<Projectile> projectiles = Collections.synchronizedList(new ArrayList<>());
     private static long projectileIdCounter = 0;
@@ -35,8 +42,9 @@ class ClientHandler implements Runnable {
 
     public ClientHandler(Socket socket) {
         this.socket = socket;
-        System.out.println("client handler created");
-
+        this.life = 5;        // Everyone starts with 5 lives
+        this.kills = 0;       // Start with 0 kills per session (or load later)
+        System.out.println("ClientHandler created");
     }
 
     @Override
@@ -138,7 +146,7 @@ class ClientHandler implements Runnable {
                         Random rand = new Random();
                         playerId = playerName + rand.nextInt(255);
                         System.out.println(playerId);
-                        checker.addplayer(playerName, playerId);
+                        checker.addPlayer(playerId, playerName);
                         out.println("REGISTER_SUCCESS|" + playerId + "|" + playerName);
                         System.out.println("New player registered: " + playerId + " (" + playerName + ")");
                         allClients.add(this);
@@ -171,11 +179,13 @@ class ClientHandler implements Runnable {
         else if("ENTER_GAME".equals(parts[0]))
         {
             GameEnter = true;
-            
+            this.kills = 0;  // Critical: Reset kills every new match!
+            this.life = 5;   // Also reset life
+
             synchronized (globalChatHistory) 
             {
                 for (String histMsg : globalChatHistory) 
-                    {
+                {
                     out.println("CHAT_HISTORY|" + histMsg);
                 }
             }
@@ -198,6 +208,21 @@ class ClientHandler implements Runnable {
             }
 
         }
+
+        else if ("LEADERBOARD".equals(parts[0])){
+                try {
+                    top = checker.getTopPlayers(10);
+                    StringBuilder sb = new StringBuilder("LEADERBOARD");
+                    for (PlayerRanking pr : top) {
+                        sb.append("|").append(pr.id).append(":").append(pr.name).append(":").append(pr.wins);
+                        
+                    }
+                    out.println(sb.toString());
+                } catch (SQLException e) {
+                    out.println("ERROR|Leaderboard fetch failed");
+                    e.printStackTrace();
+                }
+            }
         
         else if("ITEMS".equals(parts[0])) 
         {
@@ -211,6 +236,7 @@ class ClientHandler implements Runnable {
             }
    
         }
+        
 
         else if ("CHAT".equals(parts[0]))
         {
@@ -267,49 +293,77 @@ class ClientHandler implements Runnable {
         }
 
         // === NEW: SERVER-SIDE PLAYER HIT CHECK ===
+                // === NEW: SERVER-SIDE PLAYER HIT CHECK ===
         boolean hitPlayer = false;
         synchronized (allClients) {
             for (ClientHandler targetClient : allClients) {
                 if (targetClient.playerId.equals(p.ownerId)) continue; // Don't hit self
 
-                // Player hitbox
+                // Player hitbox (same as client)
                 int left = targetClient.x + 15;
                 int top = targetClient.y + 10;
                 int width = 18;
                 int height = 33;
 
-                // Bullet as small point or small box
                 if (p.x >= left && p.x <= left + width &&
                     p.y >= top && p.y <= top + height) {
 
-                    // HIT!
                     hitPlayer = true;
 
-                    // Broadcast hit/kill
-                    synchronized (allClients) {
-        for (ClientHandler client : allClients) {
-            try {
-                client.out.println("HIT|" + p.ownerId + "|" + targetClient.playerId);
-            } catch (Exception ignored) {}
-        }
-    }
+                    // Reduce target's life
+                    targetClient.life -= 1;
 
+                    // Broadcast updated life to all clients
+                    broadcast("HEALTH|" + targetClient.playerId + "|" + targetClient.life);
 
-                    // Optional: Award kill if life would go to 0
-                    // You'd need to track life server-side, or let clients handle it
+                    if (targetClient.life <= 0) {
+                        // === KILL AWARDED TO SHOOTER ===
+                        ClientHandler killer = findClientById(p.ownerId);
+                        if (killer != null) {
+                            killer.kills += 1;
 
-                    break; // One hit per bullet
+                            // Broadcast kill count update
+                            broadcast("KILLS|" + killer.playerId + "|" + killer.kills);
+
+                            // === CHECK WIN CONDITION ===
+                            if (killer.kills >= 10) {
+                                String winnerName = killer.playerName;
+                                String winnerId = killer.playerId;
+
+                                // Increment wins in DB
+                                try {
+                                    int currentWins = checker.getPlayerWins(winnerId);
+                                    checker.updateWins(winnerId, currentWins + 1);
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+
+                                // Broadcast game over to ALL clients
+                                broadcast("GAMEOVER|" + winnerId + "|" + winnerName);
+                            }
+                        }
+
+                        // Respawn the dead player
+                        targetClient.life = 5;
+                        targetClient.x = 96;
+                        targetClient.y = 96;
+                        targetClient.direction = "down";
+
+                        // Tell everyone about respawn
+                        broadcast("RESPAWN|" + targetClient.playerId + "|96|96|down");
+                    }
+
+                    break; // One bullet = one hit max
                 }
             }
-        }
+        } // ← End of synchronized(allClients)
 
+        // Now safely remove projectile if it hit a player
         if (hitPlayer) {
-            it.remove(); // Remove bullet immediately
+            it.remove();
+        }
         }
     }
-}
-
-
 
     // === BUILD PLAYER DATA ===
     StringBuilder playerData = new StringBuilder();
@@ -340,6 +394,8 @@ class ClientHandler implements Runnable {
         }
     }
     
+
+    
     // === BROADCAST ===
     String worldMsg = "WORLD|" + playerData.toString() + "PROJECTILES|" + projData.toString();
     synchronized (allClients) {
@@ -350,6 +406,7 @@ class ClientHandler implements Runnable {
         }
     }
 }
+
 
     private void logout() 
     {
@@ -412,4 +469,26 @@ class ClientHandler implements Runnable {
                 e.printStackTrace();
             }
         }
+
+        private void broadcast(String message) {
+            synchronized (allClients) {
+                for (ClientHandler client : allClients) {
+                    if (client.out != null) {
+                        client.out.println(message);
+                    }
+                }
+            }
+        }
+
+        private ClientHandler findClientById(String id) {
+            synchronized (allClients) {
+                for (ClientHandler ch : allClients) {
+                    if (ch.playerId.equals(id)) {
+                        return ch;
+                    }
+                }
+            }
+            return null;
+        }
+        
 }

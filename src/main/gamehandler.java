@@ -462,4 +462,18 @@ public class gamehandler extends gamepannel implements Runnable
             otherPlayers.clear();
             otherPlayers.putAll(newPlayers);
     }
+
+        public void stopGame() {
+            if (gameThread != null) {
+                gameThread = null; // Stops the while(gameThread != null) loop
+            }
+            localProjectiles.clear();
+            clientProjectiles.clear();
+            synchronized (otherPlayers) {
+                otherPlayers.clear();
+            }
+            // Optional: reset player stats locally if needed
+            p1.kills = 0;
+            p1.life = 5;
+        }
 }

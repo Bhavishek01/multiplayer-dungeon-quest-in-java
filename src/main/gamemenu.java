@@ -20,7 +20,7 @@ import background.loginphoto;
 
 public class gamemenu extends loginphoto implements ActionListener {
     private Font arial_40,arial_50,arial_30;
-    private JButton single,inventory,exit;  //,loginmenu;
+    private JButton single,inventory,exit, leaderboard;  //,loginmenu;
     public CardLayout cardLayout;
     public JPanel cardPanel;
     JLabel name,promptLabel,id;
@@ -108,17 +108,15 @@ public class gamemenu extends loginphoto implements ActionListener {
         exit.addActionListener(this);
         add(exit);
 
-        // add(Box.createRigidArea(new Dimension(0, 20)));
-
-        // loginmenu = new JButton("Logout");
-        // loginmenu.setFont(arial_40);
-        // loginmenu.setBorderPainted(true);
-        // loginmenu.setBackground(Color.BLACK);
-        // loginmenu.setForeground(Color.WHITE);
-        // loginmenu.setOpaque(false);
-        // loginmenu.setAlignmentX(Component.CENTER_ALIGNMENT);
-        // loginmenu.addActionListener(this);
-        // add(loginmenu);
+        leaderboard = new JButton("Leaderboard");
+        leaderboard.setFont(arial_30);
+        leaderboard.setBackground(Color.BLACK);
+        leaderboard.setForeground(Color.WHITE);
+        leaderboard.setOpaque(false);
+        leaderboard.setPreferredSize(new Dimension(200, 50));
+        leaderboard.setAlignmentX(Component.CENTER_ALIGNMENT);
+        leaderboard.addActionListener(this);
+        add(leaderboard);
 
         add(Box.createVerticalGlue());
 
@@ -151,9 +149,10 @@ public class gamemenu extends loginphoto implements ActionListener {
             
             System.exit(0);    
         }
-    //     else if (e.getSource() == loginmenu ) {
-            
-    //         cardLayout.show(cardPanel, "loginornew"); // Start with loginornew panel
-    //     }
+        else if (e.getSource() == leaderboard) {
+            leaderboardpanel lb = new leaderboardpanel(cardLayout, cardPanel, gc);
+            cardPanel.add(lb, "leaderboard");
+            cardLayout.show(cardPanel, "leaderboard");
+        }
     }
 }
